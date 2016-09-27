@@ -1,5 +1,7 @@
 ﻿using GC;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System;
 
 class Program {
     static void Main(string[] args) {
@@ -8,7 +10,8 @@ class Program {
 		Glance.outputDir =		@"D:\GC\out\";
 		Glance.sourceDir =		@"D:\GC\out\src\";
 		Glance.includeDir =		@"D:\GC\out\include\";
-		Glance.libDir =			@"D:\GC\out\lib\SFML";
+		Glance.libDir =			@"D:\GC\out\lib\SFML\";
+		Glance.settingsDir =	@"D:\GC\out\settings\";
 
 		Glance.libs.Add("sfml-graphics.lib");
 		Glance.libs.Add("sfml-window.lib");
@@ -19,8 +22,12 @@ class Program {
 
 		Glance.compilerKeys = @"/EHsc " + "/I" + Glance.includeDir;
 		Glance.linkerKeys =		@"/LIBPATH:" + Glance.libDir;
-		Glance.PutIn(new System.Collections.Generic.List<SpriteObject>() {new SpriteObject(new Vec2(10,20), "kek.jpg") });
-		
+		Glance.Init();
+		Console.WriteLine(Glance.presets["SpriteObjectAdditionalFields"]);
+
+		Glance.spriteObjects.Add(new SpriteObject(new Vec2(200,200), "kek.jpg", true));
+
+
 		Process cmd = new Process();
 		cmd.StartInfo = new ProcessStartInfo(@"cmd.exe");
 		cmd.StartInfo.RedirectStandardInput = true;
@@ -31,5 +38,7 @@ class Program {
 
 		if(Glance.isRunAppAfterBuild)
 			cmd.StandardInput.WriteLine(Glance.outputDir + "main.exe");
+
+		Console.ReadKey();
     }
 }

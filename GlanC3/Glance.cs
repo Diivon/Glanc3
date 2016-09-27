@@ -1,5 +1,6 @@
-using System.IO;
+﻿using System.IO;
 using System.Text;
+using System;
 
 namespace GC
 {
@@ -18,51 +19,158 @@ namespace GC
 		public static System.Collections.Generic.List<string> libs;
 		public static System.Collections.Generic.List<string> complilerTargets;
 		public static System.Collections.Generic.Dictionary<string, string> presets;
+		public static System.Collections.Generic.List<SpriteObject> spriteObjects;
 
-		public static void PutIn(System.Collections.Generic.List<SpriteObject> arg)
+		private static class CodeGenerator
 		{
-			_spriteObjects.AddRange(arg);
-		}
+			private static FileStream FStream;
+			private static byte TabCount;
+			private static void WriteLn(string data)
+			{
+				if (data == null)
+					return;
+				string tabs = "";
+				for (byte i = 0; i < TabCount; ++i)
+					tabs += '\t';
+				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs) + '\n');
+				FStream.Write(kek, 0, kek.Length);
+			}
+			private static void Write(string data)
+			{
+				string tabs = "";
+				for (byte i = 0; i < TabCount; ++i)
+					tabs += '\t';
+				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs));
+				FStream.Write(kek, 0, kek.Length);
+			}
+			private static void WriteLnIn(FileStream fs, string data)
+			{
+				string tabs = "";
+				for (byte i = 0; i < TabCount; ++i)
+					tabs += '\t';
+				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs) + '\n');
+				fs.Write(kek, 0, kek.Length);
+			}
+			private static void WriteIn(FileStream fs, string data)
+			{
+				string tabs = "";
+				for (byte i = 0; i < TabCount; ++i)
+					tabs += '\t';
+				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs));
+				fs.Write(kek, 0, kek.Length);
+			}
+			private static void writeStdInc(FileStream fs)
+			{
+				WriteLnIn(fs, presets["StandartIncludes"]);
+				//WriteLnIn(fs, "kek!");
+			}
+			private static void writeMainCpp(FileStream fs)
+			{
+				var temp = FStream;
+				FStream = fs;
 
-		private static void writeStandardIncludes(FileStream fs)
-		{
-			//WriteLn(fs, "#include <string>");
-			//WriteLn(fs, "#include \"GC/Vec2\"");
-			//WriteLn(fs, "#include \"SFML/Audio.hpp\"");
-			//WriteLn(fs, "#include \"SFML/Graphics.hpp\"");
-			//WriteLn(fs, "#include \"SFML/System.hpp\"");
-			//WriteLn(fs, "#include \"SFML/Network.hpp\"");
-			//WriteLn(fs, "\n");
-			
-			string s = "";
-			if ((s = presets.TryGetValue("StandartIncludes")) != false)
-				WriteLn(fs, s);
-			else
-				throw new System.Exception("Key \"StandartIncludes\" not found in presets.gsc");
-		}
+				WriteLn("#include \"main.h\"");
+				WriteLn("int main(){");
+				WriteLn("sf::RenderWindow window(sf::VideoMode(800,600), \"kek\", sf::Style::Close);");
+				WriteLn("gc::Camera mainCamera(gc::Vec2(0, 0), window);");
+				WriteLn("float dt = 0.5f;");
+				foreach(var SO in spriteObjects)//ctors
+				{
+					WriteLn(SO.Name + " Obj" + SO.Name + "(gc::Vec2(" + SO.Pos.x + ',' + SO.Pos.y  + "), \"" + SO.PicPath + "\", " + SO.IsRenderableAtStart.ToString().ToLower() + ");");
+				}
+				foreach (var SO in spriteObjects)//start loop
+				{
+					WriteLn("Obj" + SO.Name + ".start();");
+				}
+				WriteLn("while(window.isOpen()){");
+				WriteLn("sf::Event event;");
+				WriteLn("while(window.pollEvent(event)){");
+				WriteLn("if(event.type == sf::Event::Closed){window.close(); continue;}");
+				WriteLn("}");//poll event
 
-		private static void writeMainCode(FileStream fs)
-		{
-			WriteLn(fs, "#include \"SFML/Window.hpp\"");
-			WriteLn(fs, "#include \"SFML/Graphics.hpp\"");
-			WriteLn(fs, "int main(){");
-			WriteLn(fs, "\tsf::RenderWindow window(sf::VideoMode(800,600), \"kek\", sf::Style::Close);");
-			WriteLn(fs, "\twhile(window.isOpen()){");
-			WriteLn(fs, "\t\tsf::Event event;");
-			WriteLn(fs, "\t\twhile(window.pollEvent(event)){");
-			WriteLn(fs, "\t\t\tif(event.type == sf::Event::Closed){window.close(); continue;}");
-			WriteLn(fs, "\t\t}");//poll event
-			WriteLn(fs, "");
-			WriteLn(fs, "\twindow.draw(sf::CircleShape(200));");
-			WriteLn(fs, "\twindow.display();");
-			WriteLn(fs, "\t}");//while window is open
-			WriteLn(fs, "}");//main end
-		}
+				foreach (var SO in spriteObjects)//update loop
+				{
+					WriteLn("Obj" + SO.Name + ".update(dt);");
+				}
 
-        private static string callCppCompiler(string param)
-        {
-			return "cl.exe" + ' ' + param;
-        }
+				foreach (var SO in spriteObjects)//render loop
+				{
+					WriteLn("mainCamera.render(" + "Obj" + SO.Name + ");");
+					WriteLn("Obj" + SO.Name + ".render();");
+				}
+				WriteLn("window.display();");
+				WriteLn("}");//while window is open
+				WriteLn("}");//main end
+
+				FStream = temp;
+			}
+			private static void writeMainH(FileStream fs)
+			{
+				writeStdInc(fs);
+				WriteLnIn(fs, "#include \"GC/Camera.h\"");
+				foreach (var SO in spriteObjects)
+					WriteLnIn(fs, "#include \"" + SO.Name + ".h\"");
+			}
+			private static void writeSpriteObject(FileStream fs, SpriteObject SO)
+			{
+				var temp = FStream;
+				FStream = fs;
+
+				writeStdInc(fs);
+				WriteLn("class " + SO.Name + "\n{");
+				WriteLn("friend class gc::Camera;");
+				++TabCount;
+				WriteLn(presets["SpriteObject:Def"]);
+				--TabCount;
+				WriteLn("public:");
+				++TabCount;
+				WriteLn(presets["SpriteObject:Ctor"].Replace("#ClassName#", SO.Name));
+				WriteLn("void start(){");
+				++TabCount;
+				WriteLn(SO.OnStart);
+				--TabCount;
+				WriteLn("}");
+				WriteLn("void update(const float & dtime){");		//update
+				++TabCount;
+				WriteLn(SO.OnUpdate);
+				--TabCount;
+				WriteLn("}");
+				WriteLn("void render(){");							//render
+				++TabCount;
+				WriteLn(SO.OnRender);
+				--TabCount;
+				WriteLn("}");
+				--TabCount;
+				WriteLn("};");										//end class description
+
+				FStream = temp;
+			}
+			public static void GenerateCode(string outputPath)
+			{
+				foreach(var SO in spriteObjects)
+				{
+					var SOfs = File.Create(sourceDir + SO.Name + ".h");
+					writeSpriteObject(SOfs, SO);
+					SOfs.Close();
+				}
+				{
+					var mainHfs = File.Create(sourceDir + "main.h");
+					writeMainH(mainHfs);
+					mainHfs.Close();
+				}
+				{
+					var MainCppfs = File.Create(sourceDir + "main.cpp");
+					writeMainCpp(MainCppfs);
+					MainCppfs.Close();
+				}
+
+			}
+			static CodeGenerator()
+			{
+				FStream = null;
+				TabCount = 0;
+			}
+		} 
         public static string CreateApplication()
         {
             if (!Directory.Exists(sourceDir))
@@ -70,82 +178,56 @@ namespace GC
 			if (File.Exists(outputDir + "main.exe"))
 				File.Delete(outputDir + "main.exe");
 
-			foreach(var i in _spriteObjects)
-			{
-				var sof = File.Create(sourceDir + i.Name + ".h");
-				writeStandardIncludes(sof);
-				WriteLn(sof, "class " + i.Name + '{');
-				WriteLn(sof, _spriteObjectFields);
-				WriteLn(sof, "public:");
-				WriteLn(sof, "\tSpriteObject" + i + "(const DL::Vec2 & pos, std::string picPath, bool render = true):");
-				WriteLn(sof, "\t\t_pos(pos), _picPath(picPath), isRenderable(render)");
-				WriteLn(sof, "\t{}");								//ctor
-				WriteLn(sof, "\tstart(){");						//start
-				WriteLn(sof, i.OnStart);
-				WriteLn(sof, "\t}");
-				WriteLn(sof, "\tupdate(const float & dtime){");	//update
-				WriteLn(sof, i.OnUpdate);
-				WriteLn(sof, "\t}");
-				WriteLn(sof, "\trender(){");						//render
-				WriteLn(sof, i.OnRender);
-				WriteLn(sof, "\t}");
-				WriteLn(sof, "}");
-				sof.Close();
-			}
+			CodeGenerator.GenerateCode(sourceDir);
 
-			var f = File.Create(sourceDir + "main.h");
-			foreach(var i in _spriteObjects)
-			{
-				writeStandardIncludes(f);
-				WriteLn(f, "#include \"" + i.Name + '"');
-			}
-
-            string mainName = sourceDir + "main.cpp";
-            FileStream fs =  File.Create(@mainName);
-			WriteLn(fs, "#include \"main.h\"");
-            writeMainCode(fs);
-            fs.Close();
-
-			return callCppCompiler(compilerKeys + ' ' + @"/Fe" + outputDir + ' ' + sourceDir + @"main.cpp " + SpreadStringList(complilerTargets, ' ') + " /link" + ' ' + linkerKeys);
+			return "cl.exe " + compilerKeys + ' ' + @"/Fe" + outputDir + ' ' + sourceDir + @"main.cpp " + SpreadStringList(complilerTargets, ' ') + " /link" + ' ' + linkerKeys;
+		}
+		public static void PutIn(System.Collections.Generic.List<SpriteObject> SOs)
+		{
+			spriteObjects.AddRange(SOs);
 		}
 
-		private static System.Collections.Generic.List<SpriteObject> _spriteObjects;
-		private static string _spriteObjectFields;
 		static Glance()
 		{
+			outputDir = "";
+			sourceDir = "";
+			includeDir = "";
+			libDir = "";
+			settingsDir = "";
+			compilerKeys = "";
+			linkerKeys = "";
+			isRunAppAfterBuild = false;
 			libs = new System.Collections.Generic.List<string>();
 			complilerTargets = new System.Collections.Generic.List<string>();
-			_spriteObjects = new System.Collections.Generic.List<SpriteObject>();
-			presets = new Dictionary<string, string>();
-			string[] strings = File.ReadAllLines(settingsDir + "presets.gcs");
-			string mkey = "";
-			string mvalue = "";
-			for(int i = 0; i < strings.Length; ++i)
+			presets = new System.Collections.Generic.Dictionary<string, string>();
+			spriteObjects = new System.Collections.Generic.List<SpriteObject>();
+		}
+		public static void Init()
+		{
+			//Parse logic
 			{
-				if(strings[i][0] != '\t'){
-					presets.Add(mkey, mvalue)
-					mkey = strings[i];
+				string[] strings = File.ReadAllLines(settingsDir + "presets.gcs");
+				string mkey = "";
+				string mvalue = "";
+				for (int i = 0; i < strings.Length; ++i)
+				{
+					if (strings[i][0] != '\t')
+					{
+						presets.Add(mkey, mvalue);//saving previous pair
+						mvalue = "";
+						mkey = strings[i];
+					}
+					else
+					{
+						mvalue += strings[i].Remove(0, 1).Replace('$', '\n');
+					}
 				}
-				else 
-					mvalue += strings[i];
+				presets.Add(mkey, mvalue);
+				presets.Remove("");
+				Console.WriteLine(presets.Count);
 			}
-			presets.Remove("");
 		}
-		private static byte[] getBytes(string a)
-		{
-			return Encoding.Unicode.GetBytes(a);
-		}
-		private static void WriteLn(FileStream fs, string s)
-		{
-			byte[] kek = getBytes(s + '\n');
-			fs.Write(kek, 0, kek.Length);
-		}
-		private static void Write(FileStream fs, string s)
-		{
-			byte[] kek = getBytes(s);
-			fs.Write(kek, 0, kek.Length);
-		}
-		private static string SpreadStringList(System.Collections.Generic.List<string> list, char connector)
+		public static string SpreadStringList(System.Collections.Generic.List<string> list, char connector)
 		{
 			string result = "";
 			foreach (string str in list)
