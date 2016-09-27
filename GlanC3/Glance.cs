@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 
 namespace GC
@@ -9,6 +9,7 @@ namespace GC
 		public static string sourceDir;
 		public static string includeDir;
 		public static string libDir;
+		public static string settingsDir;
 
 		public static string compilerKeys;
 		public static string linkerKeys;
@@ -16,6 +17,7 @@ namespace GC
 
 		public static System.Collections.Generic.List<string> libs;
 		public static System.Collections.Generic.List<string> complilerTargets;
+		public static System.Collections.Generic.Dictionary<string, string> presets;
 
 		public static void PutIn(System.Collections.Generic.List<SpriteObject> arg)
 		{
@@ -24,13 +26,19 @@ namespace GC
 
 		private static void writeStandardIncludes(FileStream fs)
 		{
-			WriteLn(fs, "#include <string>");
-			WriteLn(fs, "#include \"GC/Vec2\"");
-			WriteLn(fs, "#include \"SFML/Audio.hpp\"");
-			WriteLn(fs, "#include \"SFML/Graphics.hpp\"");
-			WriteLn(fs, "#include \"SFML/System.hpp\"");
-			WriteLn(fs, "#include \"SFML/Network.hpp\"");
-			WriteLn(fs, "\n");
+			//WriteLn(fs, "#include <string>");
+			//WriteLn(fs, "#include \"GC/Vec2\"");
+			//WriteLn(fs, "#include \"SFML/Audio.hpp\"");
+			//WriteLn(fs, "#include \"SFML/Graphics.hpp\"");
+			//WriteLn(fs, "#include \"SFML/System.hpp\"");
+			//WriteLn(fs, "#include \"SFML/Network.hpp\"");
+			//WriteLn(fs, "\n");
+			
+			string s = "";
+			if ((s = presets.TryGetValue("StandartIncludes")) != false)
+				WriteLn(fs, s);
+			else
+				throw new System.Exception("Key \"StandartIncludes\" not found in presets.gsc");
 		}
 
 		private static void writeMainCode(FileStream fs)
@@ -79,7 +87,7 @@ namespace GC
 				WriteLn(sof, i.OnUpdate);
 				WriteLn(sof, "\t}");
 				WriteLn(sof, "\trender(){");						//render
-				WriteLn(sof, i.OnUpdate);
+				WriteLn(sof, i.OnRender);
 				WriteLn(sof, "\t}");
 				WriteLn(sof, "}");
 				sof.Close();
@@ -108,7 +116,20 @@ namespace GC
 			libs = new System.Collections.Generic.List<string>();
 			complilerTargets = new System.Collections.Generic.List<string>();
 			_spriteObjects = new System.Collections.Generic.List<SpriteObject>();
-			_spriteObjectFields = "\tDL::Vec2 _pos;\n\tstd::string _picPath;\n\tbool isRenderable;";
+			presets = new Dictionary<string, string>();
+			string[] strings = File.ReadAllLines(settingsDir + "presets.gcs");
+			string mkey = "";
+			string mvalue = "";
+			for(int i = 0; i < strings.Length; ++i)
+			{
+				if(strings[i][0] != '\t'){
+					presets.Add(mkey, mvalue)
+					mkey = strings[i];
+				}
+				else 
+					mvalue += strings[i];
+			}
+			presets.Remove("");
 		}
 		private static byte[] getBytes(string a)
 		{
@@ -131,7 +152,6 @@ namespace GC
 				result += str + connector;
 			return result;
 		}
-
 	}//class Glance
 
 	public class Vec2
