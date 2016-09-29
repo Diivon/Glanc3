@@ -1,38 +1,57 @@
-﻿using System.IO;
+using System;
+using System.IO;
 using System.Text;
 using System.Diagnostics;
-using System;
+using System.Collections.Generic;
 
 namespace GC
 {
     public static class Glance
     {
+		///Directory where launch-ready application is
 		public static string outputDir;
+		///Directory, where c++ sources (generated) is
 		public static string sourceDir;
+		///Direstory for #include
 		public static string includeDir;
+		///Directory, where .lib files are
 		public static string libDir;
+		///Directory, where Glance settings(.gcs) is
 		public static string settingsDir;
-
+		
+		///keys for c++ compiler
 		public static string compilerKeys;
+		///keys for c++ linker
 		public static string linkerKeys;
-
+		
+		///is Glance will generate code for Objects, which already haven't this when Buid() is called
 		public static bool isGenerateCode;
+		///is Glance will recompile sources when Buid() is called
 		public static bool isCompile;
-		public static bool isRunApp;
-
+		///is Glance will run application after compiling
+		public static bool isRunAppAfterCompiling;
+		///name for .exe file of launch-ready application
 		public static string exeName;
-
-		public static System.Collections.Generic.List<string> libs;
-		public static System.Collections.Generic.List<string> complilerTargets;
-		public static System.Collections.Generic.Dictionary<string, string> presets;
-		public static System.Collections.Generic.Dictionary<string, string> settings;
-		public static System.Collections.Generic.List<SpriteObject> spriteObjects;
+		
+		///libs, which will linked with you code
+		public static List<string> libs;
+		///files, that compiler will compile/link (.cpp/.lib)
+		public static List<string> complilerTargets;
+		///collection of code presets for all occasions(Class templates as example)
+		public static Dictionary<string, string> presets;
+		///else settings for building
+		public static Dictionary<string, string> settings;
+		///collection of all SpriteObjects, which must be in app
+		public static List<SpriteObject> spriteObjects;
 
 		//												----CodeGenerator----
 		public static class CodeGenerator
 		{
+			///FileStream for Write/WriteLn
 			internal static FileStream FStream;
+			///
 			internal static byte TabCount;
+			///write data + '\n' -> CodeGenerator.FStream considering TabCount
 			internal static void WriteLn(string data)
 			{
 				if (data == null)
@@ -43,6 +62,7 @@ namespace GC
 				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs) + '\n');
 				FStream.Write(kek, 0, kek.Length);
 			}
+			///write data -> CodeGenerator.FStream considering TabCount
 			internal static void Write(string data)
 			{
 				string tabs = "";
@@ -51,6 +71,7 @@ namespace GC
 				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs));
 				FStream.Write(kek, 0, kek.Length);
 			}
+			///write data + '\n' -> fs considering TabCount
 			internal static void WriteLnIn(FileStream fs, string data)
 			{
 				string tabs = "";
@@ -59,6 +80,7 @@ namespace GC
 				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs) + '\n');
 				fs.Write(kek, 0, kek.Length);
 			}
+			///write data -> fs considering TabCount
 			internal static void WriteIn(FileStream fs, string data)
 			{
 				string tabs = "";
@@ -67,11 +89,12 @@ namespace GC
 				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs));
 				fs.Write(kek, 0, kek.Length);
 			}
+			///write "StandartIncludes" from settings.gcs -> fs
 			internal static void writeStdInc(FileStream fs)
 			{
 				WriteLnIn(fs, presets["StandartIncludes"]);
-				//WriteLnIn(fs, "kek!");
 			}
+			///horror, i know
 			internal static void writeMainCpp(FileStream fs)
 			{
 				var temp = FStream;
@@ -118,6 +141,7 @@ namespace GC
 
 				FStream = temp;
 			}
+			///include everything, what must know main.cpp
 			internal static void writeMainH(FileStream fs)
 			{
 				writeStdInc(fs);
@@ -125,11 +149,13 @@ namespace GC
 				foreach (var SO in spriteObjects)
 					WriteLnIn(fs, "#include \"" + SO.Name + ".h\"");
 			}
+			///write SpriteObject template from settings.gcs -> fs
 			internal static void writeSpriteObject(FileStream fs, SpriteObject SO)
 			{
 				writeStdInc(fs);
 				WriteLnIn(fs, presets["SpriteObject:FDef"].Replace("#ClassName#", SO.Name));
 			}
+			///Code generate
 			public static void GenerateCode(string outputPath)
 			{
 				foreach(var SO in spriteObjects)
@@ -160,7 +186,7 @@ namespace GC
 			}
 		}
 		//												---/CodeGenerator/---
-
+		///Buid application by rules
 		public static void Build()
 		{
 			if (Glance.isGenerateCode)
@@ -177,7 +203,7 @@ namespace GC
 				cmd.Start();
 				cmd.StandardInput.WriteLine(Glance.settingsDir + Glance.settings["EnvVarsConfig"]);
 				cmd.StandardInput.WriteLine(Glance.CreateApplication());
-				if (Glance.isRunApp)
+				if (Glance.isRunAppAfterCompiling)
 				{
 					cmd.StandardInput.WriteLine("D:");
 					cmd.StandardInput.WriteLine("cd " + Glance.outputDir);
@@ -187,6 +213,7 @@ namespace GC
 			}
 			Console.ReadKey();
 		}
+		///return string, which call compiler correctly
 		private static string CreateApplication()
         {
             if (!Directory.Exists(sourceDir))
@@ -205,37 +232,38 @@ namespace GC
 			settingsDir = "";
 			compilerKeys = "";
 			linkerKeys = "";
-			libs = new System.Collections.Generic.List<string>();
-			complilerTargets = new System.Collections.Generic.List<string>();
-			presets = new System.Collections.Generic.Dictionary<string, string>();
-			settings = new System.Collections.Generic.Dictionary<string, string>();
+			libs = new List<string>();
+			complilerTargets = new List<string>();
+			presets = new Dictionary<string, string>();
+			settings = new Dictionary<string, string>();
 
-			spriteObjects = new System.Collections.Generic.List<SpriteObject>();
+			spriteObjects = new List<SpriteObject>();
 		}
 		public static void Init()
 		{
 			ParseGCS(File.ReadAllLines(settingsDir + "presets.gcs"), ref presets);
 			ParseGCS(File.ReadAllLines(settingsDir + "settings.gcs"), ref settings);
 		}
+		///parse Glance settings(.gcs) file
 		internal static void ParseGCS(string[] strings, ref System.Collections.Generic.Dictionary<string, string> dict)
 		{
 			string mkey = "";
 			string mvalue = "";
-			for (int i = 0; i < strings.Length; ++i)
+			foreach(var str in strings)
 			{
-				if (strings[i][0] != '\t')
+				if (str[0] != '\t')//if string is key
 				{
 					dict.Add(mkey, mvalue);//saving previous pair
 					mvalue = "";
-					mkey = strings[i];
+					mkey = str;
 				}
 				else
 				{
-					mvalue += strings[i].Remove(0,1) + '\n';
+					mvalue += str.Remove(0,1) + '\n';//deleting '\t' as first cymbol
 				}
 			}
-			dict.Add(mkey, mvalue);
-			dict.Remove("");
+			dict.Add(mkey, mvalue);//save last pair
+			dict.Remove("");//for guarantee
 		}
 		internal static string GatherStringList(System.Collections.Generic.List<string> list, char connector)
 		{
@@ -244,6 +272,7 @@ namespace GC
 				result += str + connector;
 			return result;
 		}
+		///kaef
 		internal static string ToCppString(string s)
 		{
 			return '"' + s.Replace(@"\", @"\\") + '"';
