@@ -24,7 +24,7 @@ class Program {
 
 		Glance.exeName = "main.exe";
 
-		Glance.isGenerateCode = true;
+		Glance.isGenerateCode = false;
 		Glance.isCompile = true;
 		Glance.isRunAppAfterCompiling = true;
 
@@ -32,7 +32,7 @@ class Program {
 
 		for (uint x = 0; x < 15; ++x)
 			for(uint y = 0; y < 15; ++y)
-				Glance.spriteObjects.Add(new SpriteObject(new Vec2(x * 50, y * 50), @"resources\Sea.jpg", true));
+				Glance.spriteObjects.Add(new StaticObject(new Vec2(x * 50, y * 50), @"resources\Sea.jpg", true));
 
 		Glance.Build();
     }
