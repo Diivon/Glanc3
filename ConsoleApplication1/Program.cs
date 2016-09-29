@@ -26,7 +26,7 @@ class Program {
 
 		Glance.isGenerateCode = true;
 		Glance.isCompile = true;
-		Glance.isRunApp = true;
+		Glance.isRunAppAfterCompiling = true;
 
 		Glance.Init();
 
