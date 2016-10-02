@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGenerator.cs" />
+    <Compile Include="Component.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Glance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -50,7 +51,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SpriteFrame.cs" />
-    <Compile Include="StaticObject.cs" />
+    <Compile Include="PhysicalObject.cs" />
     <Compile Include="Vec2.cs" />
   </ItemGroup>
   <ItemGroup>

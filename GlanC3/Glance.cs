@@ -12,7 +12,7 @@ namespace GC
 		public static string outputDir;
 		///<summary>Directory, where c++ sources (generated) is</summary>
 		public static string sourceDir;
-		///<summary>Direstory for #include</summary>
+		///<summary>Directory for #include</summary>
 		public static string includeDir;
 		///<summary>Directory, where .lib files are</summary>
 		public static string libDir;
@@ -45,16 +45,23 @@ namespace GC
 		///<summary>else settings for building</summary>
 		public static Dictionary<string, string> settings;
 		///<summary>collection of all SpriteObjects, which must be in app</summary>
-		public static List<StaticObject> spriteObjects;
+		public static List<PhysicalObject> PhysicalObjects;
 
-
-		//												---/CodeGenerator/---
 		///<summary>Buid application by rules</summary>
 		public static void Build()
 		{
 			if (Glance.isGenerateCode)
 			{
-				Glance.CodeGenerator.GenerateCode(Glance.outputDir);
+				if (Glance.isClearSrcDir)
+				{
+					Directory.Delete(sourceDir, true);
+					Directory.CreateDirectory(sourceDir);
+				}
+				Glance.CodeGenerator.GenerateCode();
+			}
+			if (Glance.isRunAppAfterCompiling)
+			{
+				File.Delete(Glance.outputDir + Glance.exeName);
 			}
 
 			if (Glance.isCompile)
@@ -100,7 +107,7 @@ namespace GC
 			presets = new Dictionary<string, string>();
 			settings = new Dictionary<string, string>();
 
-			spriteObjects = new List<StaticObject>();
+			PhysicalObjects = new List<PhysicalObject>();
 		}
 		public static void Init()
 		{
@@ -114,6 +121,7 @@ namespace GC
 			string mvalue = "";
 			foreach(var str in strings)
 			{
+				if (str == "") continue;
 				if (str[0] != '\t')//if string is key
 				{
 					dict.Add(mkey, mvalue);//saving previous pair
@@ -140,5 +148,6 @@ namespace GC
 		{
 			return '"' + s.Replace(@"\", @"\\") + '"';
 		}
+
 	}//class Glance
 }//ns GC

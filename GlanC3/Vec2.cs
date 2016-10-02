@@ -16,7 +16,7 @@ namespace GC
 		}
 		public string ToCppCtor()
 		{
-			return "gc::Vec2(" + x + ", " + y + ')';
+			return "::gc::Vec2(" + x + ", " + y + ')';
 		}
 	}
 }

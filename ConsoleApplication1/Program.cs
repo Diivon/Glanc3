@@ -24,16 +24,17 @@ class Program {
 
 		Glance.exeName = "main.exe";
 
-		Glance.isGenerateCode = false;
+		Glance.isGenerateCode = true;
 		Glance.isCompile = true;
 		Glance.isRunAppAfterCompiling = true;
-
 		Glance.Init();
+		//-------------Client code starts here
 
-		for (uint x = 0; x < 15; ++x)
-			for(uint y = 0; y < 15; ++y)
-				Glance.spriteObjects.Add(new StaticObject(new Vec2(x * 50, y * 50), @"resources\Sea.jpg", true));
+		var Obj = new GC.PhysicalObject(new Vec2(200, 200));
+		Obj.SetGraphicalComponent(new GC.Component.GraphicalComponent.StaticSprite(@"resources\sea.jpg"));
+		Glance.PhysicalObjects.Add(Obj);
 
+		//-------------Client code ends here
 		Glance.Build();
     }
 }

@@ -20,6 +20,8 @@ namespace GC
 			{
 				if (data == null)
 					return;
+				if (data[data.Length - 1] == '{') ++TabCount;
+				if (data[0] == '}') --TabCount;
 				string tabs = "";
 				for (byte i = 0; i < TabCount; ++i)
 					tabs += '\t';
@@ -38,6 +40,10 @@ namespace GC
 			///<summary>write data + '\n' -> fs considering TabCount</summary>
 			internal static void WriteLnIn(FileStream fs, string data)
 			{
+				if (data == null)
+					return;
+				if (data[data.Length - 1] == '{') ++TabCount;
+				if (data[0] == '}') --TabCount;
 				string tabs = "";
 				for (byte i = 0; i < TabCount; ++i)
 					tabs += '\t';
@@ -66,38 +72,33 @@ namespace GC
 
 				WriteLn("#include \"main.h\"");
 				WriteLn("int main(){");
-				++TabCount;
 				WriteLn("sf::RenderWindow window(sf::VideoMode(800,600), \"kek\", sf::Style::Close);");
 				WriteLn("gc::Camera mainCamera(gc::Vec2(0, 0), window);");
 				WriteLn("float dt = 0.5f;");
-				foreach (var SO in spriteObjects)//ctors
+				foreach (var SO in PhysicalObjects)//ctors
 				{
-					WriteLn(SO.Name + " Obj" + SO.Name + '(' +  SO.Pos.ToCppCtor() + ", " + ToCppString(SO.PicPath) + ");");
+					WriteLn(SO.Name + " Obj" + SO.Name + '(' +  SO.Pos.ToCppCtor() + ");");
 				}
 				WriteLn("\n");
-				foreach (var SO in spriteObjects)//start loop
+				foreach (var SO in PhysicalObjects)//start loop
 				{
-					WriteLn(SO.ObjName + ".OnStart();");
+					WriteLn(SO.ObjName + ".onStart();");
 				}
 				WriteLn("while(window.isOpen()){");
-				++TabCount;
 				WriteLn("sf::Event event;");
-				++TabCount;
 				WriteLn("while(window.pollEvent(event)){");
 				WriteLn("if(event.type == sf::Event::Closed){window.close(); continue;}");
-				--TabCount;
-				WriteLn("}\nwindow.clear();");//poll event
-				--TabCount;
+				WriteLn("}");//poll event
 
-				foreach (var SO in spriteObjects)//update loop
+				WriteLn("window.clear();");
+				foreach (var SO in PhysicalObjects)//update loop
 				{
-					WriteLn(SO.ObjName + ".OnUpdate(dt);");
+					WriteLn(SO.ObjName + ".onUpdate(dt);");
 				}
 
-				foreach (var SO in spriteObjects)//render loop
+				foreach (var SO in PhysicalObjects)//render loop
 				{
-					WriteLn("mainCamera.render(" + "Obj" + SO.Name + ");");
-					WriteLn(SO.ObjName + ".OnRender(mainCamera);");
+					WriteLn("mainCamera.render(" + SO.ObjName + ".onRender());");
 				}
 				WriteLn("window.display();");
 				WriteLn("}");//while window is open
@@ -110,24 +111,31 @@ namespace GC
 			{
 				writeStdInc(fs);
 				WriteLnIn(fs, "#include \"GC/Camera.h\"");
-				foreach (var SO in spriteObjects)
+				foreach (var SO in PhysicalObjects)
 					WriteLnIn(fs, "#include \"" + SO.Name + ".h\"");
 			}
 			///<summary>write SpriteObject template from settings.gcs -> fs</summary>
-			internal static void writeSpriteObject(FileStream fs, StaticObject SO)
+			internal static void writePhysicalObject(FileStream fs, PhysicalObject PO)
 			{
 				writeStdInc(fs);
-				WriteLnIn(fs, presets["SpriteObject:FDef"].Replace("#ClassName#", SO.Name));
+				WriteLnIn	(fs, presets["PhysicalObject:FDef"].
+									Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors()).
+									Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody()).
+									Replace("#ComponentsVariables#", PO.GetComponentsVariables()).
+									Replace("#ComponentsMethods#", PO.GetComponentsMethods()).
+									Replace("#OnRender#", PO.GetGraphicalComponentOnRender()).
+									Replace("#ClassName#", PO.Name)
+							);
 			}
 			///<summary>Code generate</summary>
-			public static void GenerateCode(string outputPath)
+			public static void GenerateCode()
 			{
-				foreach (var SO in spriteObjects)
+				foreach (var SO in PhysicalObjects)
 				{
 					if (SO.FilePath == null)
 					{
 						var SOfs = File.Create(sourceDir + SO.Name + ".h");
-						writeSpriteObject(SOfs, SO);
+						writePhysicalObject(SOfs, SO);
 						SOfs.Close();
 					}
 				}
