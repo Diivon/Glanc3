@@ -44,8 +44,8 @@ namespace Glc
 		public static Dictionary<string, string> templates;
 		///<summary>else settings for building</summary>
 		public static Dictionary<string, string> settings;
-		///<summary>collection of all SpriteObjects, which must be in app</summary>
-		public static List<PhysicalObject> PhysicalObjects;
+		/// <summary>Contain all scene of the game</summary>
+		public static List<Scene> scenes;
 
 		///<summary>Buid application by rules</summary>
 		public static void Build()
@@ -54,7 +54,12 @@ namespace Glc
 			{
 				if (Glance.isClearSrcDir)
 				{
-					Directory.Delete(sourceDir, true);
+					try
+					{
+						Directory.Delete(sourceDir, true);
+					}
+					catch (Exception e) { }
+					System.Threading.Thread.Sleep(50);
 					Directory.CreateDirectory(sourceDir);
 				}
 				Glance.CodeGenerator.GenerateCode();
@@ -107,7 +112,7 @@ namespace Glc
 			templates = new Dictionary<string, string>();
 			settings = new Dictionary<string, string>();
 
-			PhysicalObjects = new List<PhysicalObject>();
+			scenes = new List<Scene>();
 		}
 		public static void Init()
 		{

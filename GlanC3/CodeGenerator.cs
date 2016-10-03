@@ -76,15 +76,9 @@ namespace Glc
 				WriteLn("sf::RenderWindow window(sf::VideoMode(800,600), \"kek\", sf::Style::Close);");
 				WriteLn("gc::Camera mainCamera(gc::Vec2(0, 0), window);");
 				WriteLn("float dt = 0.5f;");
-				foreach (var SO in PhysicalObjects)//ctors
-				{
-					WriteLn(SO.ClassName + " Obj" + SO.ClassName + '(' +  SO.Pos.ToCppCtor() + ");");
-				}
+				WriteLn(scenes[0].ClassName + ' ' + scenes[0].ObjectName + ";");
 				WriteLn("\n");
-				foreach (var SO in PhysicalObjects)//start loop
-				{
-					WriteLn(SO.ObjectName + ".onStart();");
-				}
+				WriteLn(scenes[0].ObjectName + ".start();");//start
 				WriteLn("while(window.isOpen()){");
 				WriteLn("sf::Event event;");
 				WriteLn("while(window.pollEvent(event)){");
@@ -92,15 +86,11 @@ namespace Glc
 				WriteLn("}");//poll event
 
 				WriteLn("window.clear();");
-				foreach (var SO in PhysicalObjects)//update loop
-				{
-					WriteLn(SO.ObjectName + ".onUpdate(dt);");
-				}
 
-				foreach (var SO in PhysicalObjects)//render loop
-				{
-					WriteLn("mainCamera.render(" + SO.ObjectName + ".onRender());");
-				}
+				WriteLn(scenes[0].ObjectName + ".update(dt);");//update
+
+				WriteLn(scenes[0].ObjectName + ".render(mainCamera);");//render
+
 				WriteLn("window.display();");
 				WriteLn("}");//while window is open
 				WriteLn("}");//main end
@@ -112,8 +102,8 @@ namespace Glc
 			{
 				writeStdInc(fs);
 				WriteLnIn(fs, "#include \"GC/Camera.h\"");
-				foreach (var SO in PhysicalObjects)
-					WriteLnIn(fs, "#include \"" + SO.ClassName + ".h\"");
+				foreach (var Scn in scenes)
+					WriteLnIn(fs, "#include \"" + Scn.ClassName + ".h\"");
 			}
 			///<summary>write SpriteObject template from settings.gcs -> fs</summary>
 			internal static void writePhysicalObject(FileStream fs, PhysicalObject PO)
@@ -121,6 +111,7 @@ namespace Glc
 				writeStdInc(fs);
 				WriteLnIn(fs, templates["PhysicalObject:FDef"].
 									Replace("#ComponentsVariables#", PO.GetComponentsVariables()).
+									Replace("#Pos#" , PO.Pos.ToCppCtor()).
 									Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors()).
 									Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody()).
 									Replace("#ComponentsMethods#", PO.GetComponentsMethods()).
@@ -130,18 +121,49 @@ namespace Glc
 									Replace("#ClassName#", PO.ClassName)
 							);
 			}
+			internal static void writeScene(FileStream fs, Scene S)
+			{
+				writeStdInc(fs);
+				foreach(var obj in S.ObjectList)
+				{
+					WriteLnIn(fs, "#include \"" + obj.ClassName + ".h\"");
+				}
+				var objects = new List<string>();
+				foreach (var obj in S.ObjectList)
+				{
+					objects.Add("friend class " + obj.ClassName + ';');
+					objects.Add(obj.ClassName + ' ' + obj.ObjectName + ';');
+				}//objects filling
+				string ctors = "";
+				for(int i = 0; i < S.ObjectList.Count - 1; ++i)
+					ctors += S.ObjectList[i].ObjectName + "(), ";
+				ctors += S.ObjectList[S.ObjectList.Count - 1].ObjectName + "()";
+				WriteLnIn(fs, templates["Scene:FDef"].
+												Replace("#ClassName#", S.ClassName).
+												Replace("#Objects#", Glance.GatherStringList(objects, '\n')).
+												Replace("#Ctors#", ctors).
+												Replace("#start#", S.GetAllObjectsOnStart()).
+												Replace("#update#", S.GetAllObjectsOnUpdate()).
+												Replace("#render#", S.GetAllObjectsOnRender())
+							);
+			}
 			///<summary>Code generate</summary>
 			public static void GenerateCode()
 			{
-				foreach (var SO in PhysicalObjects)
+				foreach (var SO in	scenes[0].ObjectList)
 				{
 					if (SO.FilePath == null)
 					{
 						var SOfs = File.Create(sourceDir + SO.ClassName + ".h");
-						writePhysicalObject(SOfs, SO);
+						writePhysicalObject(SOfs, SO as PhysicalObject);
 						SOfs.Close();
 					}
 				}
+
+				var Scfs = File.Create(sourceDir + scenes[0].ClassName + ".h");
+				writeScene(Scfs, scenes[0]);
+				Scfs.Close();
+
 				{
 					var mainHfs = File.Create(sourceDir + "main.h");
 					writeMainH(mainHfs);

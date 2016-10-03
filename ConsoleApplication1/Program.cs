@@ -1,6 +1,7 @@
 ﻿using Glc;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System;
 
 class Program {
@@ -24,26 +25,33 @@ class Program {
 
 		Glance.exeName = "main.exe";
 
+		Glance.isClearSrcDir = true;
 		Glance.isGenerateCode = true;
 		Glance.isCompile = true;
 		Glance.isRunAppAfterCompiling = true;
 		Glance.Init();
 		//-------------Client code starts here
-
-		/*
+		var scene = new Scene();
+		
+		
 		var Obj = new PhysicalObject(new Vec2(200, 200));
-		//Obj.SetGraphicalComponent(new GC.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg"));
-		Obj.SetGraphicalComponent(new Glc.Component.GraphicalComponent.Animation(Glc.Component.AnimationType.Single));
-		Glance.PhysicalObjects.Add(Obj);
-		*/
+		Obj.SetGraphicalComponent(new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg"));
+		scene.ObjectList.Add(Obj);
 
+		var o1 = new PhysicalObject(new Vec2(10, 20));
+		//o1.AddComponent(new Glc.Component.Script(File.ReadAllLines(@"C:\Users\Влад\Desktop\kek.cpp")));
+		o1.SetGraphicalComponent(new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\2.jpg"));
+		scene.ObjectList.Add(o1);
+
+		Glance.scenes.Add(scene);
+		/*
 		Glc.Component.Script scr = new Glc.Component.Script();
 		scr.Data = System.IO.File.ReadAllLines(@"C:\Users\Влад\Desktop\kek.cpp");
 		var s = scr.GetCppOnStart();
 		Console.Write(s);
-		Console.ReadKey();
+		Console.ReadKey();*/
 
 		//-------------Client code ends here
-		//Glance.Build();
+		Glance.Build();
     }
 }

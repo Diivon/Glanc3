@@ -10,6 +10,7 @@ namespace Glc
 	{
 		public Vec2 Pos;
 		private static uint _count;
+		static PhysicalObject() { _count = 0; }
 		public PhysicalObject(Vec2 pos, bool isRenderable = true) : base()
 		{
 			IsRenderableAtStart = isRenderable;

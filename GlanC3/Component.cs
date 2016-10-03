@@ -182,6 +182,10 @@ namespace Glc
 			{
 				return true;
 			}
+			public Script(string[] data)
+			{
+				Data = data;
+			}
 		}
 	}
 }

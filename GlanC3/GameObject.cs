@@ -8,23 +8,27 @@ namespace Glc
 {
 	public abstract class GameObject
 	{
+		private string _className;
 		public string ClassName
 		{
 			set
 			{
 				if (Regex.IsMatch(value, @"^[a-zA-Z0-9_]+$"))
-					ClassName = value;
+					_className = value;
+				else throw new ArgumentException("Name must contain only letters, numbers and cymbol '_'");
 			}
-			get { return ClassName; }
+			get { return _className; }
 		}
+		private string _objectName;
 		public string ObjectName
 		{
 			set
 			{
 				if (Regex.IsMatch(value, @"^[a-zA-Z0-9_]+$"))
-					ObjectName = value;
+					_objectName = value;
+				else throw new ArgumentException("Name must contain only letters, numbers and cymbol '_'");
 			}
-			get { return ObjectName; }
+			get { return _objectName; }
 		}
 		public bool IsRenderableAtStart;
 
