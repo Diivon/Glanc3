@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GC
+namespace Glc
 {
 	public class Vec2
 	{

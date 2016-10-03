@@ -1,4 +1,4 @@
-﻿using GC;
+﻿using Glc;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System;
@@ -30,11 +30,20 @@ class Program {
 		Glance.Init();
 		//-------------Client code starts here
 
-		var Obj = new GC.PhysicalObject(new Vec2(200, 200));
-		Obj.SetGraphicalComponent(new GC.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg"));
+		/*
+		var Obj = new PhysicalObject(new Vec2(200, 200));
+		//Obj.SetGraphicalComponent(new GC.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg"));
+		Obj.SetGraphicalComponent(new Glc.Component.GraphicalComponent.Animation(Glc.Component.AnimationType.Single));
 		Glance.PhysicalObjects.Add(Obj);
+		*/
+
+		Glc.Component.Script scr = new Glc.Component.Script();
+		scr.Data = System.IO.File.ReadAllLines(@"C:\Users\Влад\Desktop\kek.cpp");
+		var s = scr.GetCppOnStart();
+		Console.Write(s);
+		Console.ReadKey();
 
 		//-------------Client code ends here
-		Glance.Build();
+		//Glance.Build();
     }
 }

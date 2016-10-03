@@ -4,25 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GC
+namespace Glc
 {
 	public class PhysicalObject : GameObject
 	{
 		public Vec2 Pos;
-		public string Name;
-		public bool IsRenderable;
-		internal string ObjName;
 		private static uint _count;
 		public PhysicalObject(Vec2 pos, bool isRenderable = true) : base()
 		{
-			IsRenderable = isRenderable;
+			IsRenderableAtStart = isRenderable;
 			Pos = pos;
-			Name = "PhysicalObject" + _count++;
-			ObjName = "Obj" + Name;
+			ClassName = "PhysicalObject" + _count++;
+			ObjectName = "Obj" + ClassName;
 		}
 		override public void GenerateFile()
 		{
-			FilePath = Glance.sourceDir + Name + ".h";
+			FilePath = Glance.sourceDir + ClassName + ".h";
 			var fs = System.IO.File.Create(FilePath);
 			Glance.CodeGenerator.writePhysicalObject(fs, this);
 		}

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace GC
+namespace Glc
 {
 	public static partial class Glance
 	{
@@ -40,6 +40,7 @@ namespace GC
 			///<summary>write data + '\n' -> fs considering TabCount</summary>
 			internal static void WriteLnIn(FileStream fs, string data)
 			{
+				TabCount = 0;
 				if (data == null)
 					return;
 				if (data[data.Length - 1] == '{') ++TabCount;
@@ -62,7 +63,7 @@ namespace GC
 			///<summary>write "StandartIncludes" from settings.gcs -> fs</summary>
 			internal static void writeStdInc(FileStream fs)
 			{
-				WriteLnIn(fs, presets["StandartIncludes"]);
+				WriteLnIn(fs, templates["StandartIncludes"]);
 			}
 			///<summary>horror, i know</summary>
 			internal static void writeMainCpp(FileStream fs)
@@ -77,12 +78,12 @@ namespace GC
 				WriteLn("float dt = 0.5f;");
 				foreach (var SO in PhysicalObjects)//ctors
 				{
-					WriteLn(SO.Name + " Obj" + SO.Name + '(' +  SO.Pos.ToCppCtor() + ");");
+					WriteLn(SO.ClassName + " Obj" + SO.ClassName + '(' +  SO.Pos.ToCppCtor() + ");");
 				}
 				WriteLn("\n");
 				foreach (var SO in PhysicalObjects)//start loop
 				{
-					WriteLn(SO.ObjName + ".onStart();");
+					WriteLn(SO.ObjectName + ".onStart();");
 				}
 				WriteLn("while(window.isOpen()){");
 				WriteLn("sf::Event event;");
@@ -93,12 +94,12 @@ namespace GC
 				WriteLn("window.clear();");
 				foreach (var SO in PhysicalObjects)//update loop
 				{
-					WriteLn(SO.ObjName + ".onUpdate(dt);");
+					WriteLn(SO.ObjectName + ".onUpdate(dt);");
 				}
 
 				foreach (var SO in PhysicalObjects)//render loop
 				{
-					WriteLn("mainCamera.render(" + SO.ObjName + ".onRender());");
+					WriteLn("mainCamera.render(" + SO.ObjectName + ".onRender());");
 				}
 				WriteLn("window.display();");
 				WriteLn("}");//while window is open
@@ -112,19 +113,21 @@ namespace GC
 				writeStdInc(fs);
 				WriteLnIn(fs, "#include \"GC/Camera.h\"");
 				foreach (var SO in PhysicalObjects)
-					WriteLnIn(fs, "#include \"" + SO.Name + ".h\"");
+					WriteLnIn(fs, "#include \"" + SO.ClassName + ".h\"");
 			}
 			///<summary>write SpriteObject template from settings.gcs -> fs</summary>
 			internal static void writePhysicalObject(FileStream fs, PhysicalObject PO)
 			{
 				writeStdInc(fs);
-				WriteLnIn	(fs, presets["PhysicalObject:FDef"].
+				WriteLnIn(fs, templates["PhysicalObject:FDef"].
+									Replace("#ComponentsVariables#", PO.GetComponentsVariables()).
 									Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors()).
 									Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody()).
-									Replace("#ComponentsVariables#", PO.GetComponentsVariables()).
 									Replace("#ComponentsMethods#", PO.GetComponentsMethods()).
-									Replace("#OnRender#", PO.GetGraphicalComponentOnRender()).
-									Replace("#ClassName#", PO.Name)
+									Replace("#OnUpdate#", PO.GetComponentsOnUpdate()).
+									Replace("#OnRender#", PO.GetComponentsOnRender()).
+									Replace("#OnStart#", PO.GetComponentsOnStart()).
+									Replace("#ClassName#", PO.ClassName)
 							);
 			}
 			///<summary>Code generate</summary>
@@ -134,7 +137,7 @@ namespace GC
 				{
 					if (SO.FilePath == null)
 					{
-						var SOfs = File.Create(sourceDir + SO.Name + ".h");
+						var SOfs = File.Create(sourceDir + SO.ClassName + ".h");
 						writePhysicalObject(SOfs, SO);
 						SOfs.Close();
 					}

@@ -1,13 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace GC
+namespace Glc
 {
 	public abstract class GameObject
 	{
+		public string ClassName
+		{
+			set
+			{
+				if (Regex.IsMatch(value, @"^[a-zA-Z0-9_]+$"))
+					ClassName = value;
+			}
+			get { return ClassName; }
+		}
+		public string ObjectName
+		{
+			set
+			{
+				if (Regex.IsMatch(value, @"^[a-zA-Z0-9_]+$"))
+					ObjectName = value;
+			}
+			get { return ObjectName; }
+		}
+		public bool IsRenderableAtStart;
+
 		/// <summary>Components of this object</summary>
 		protected List<Component.Component> _components;
 		/// <summary>Graphical component of this object</summary>
@@ -67,9 +87,28 @@ namespace GC
 			return result + "\n" + _graphComp.GetCppConstructorBody();
 		}
 		/// <summary>return all components necessary OnRender code</summary>
-		public string GetGraphicalComponentOnRender()
+		public string GetComponentsOnRender()
 		{
-			return _graphComp.GetCppOnRender();
+			string result = "";
+			foreach (var com in _components)
+				result += "\n" + com.GetCppOnRender();
+			return result + "\n" + _graphComp.GetCppOnRender();
+		}
+		/// <summary>return all components necessary OnUpdate code</summary>
+		public string GetComponentsOnUpdate()
+		{
+			string result = "";
+			foreach (var com in _components)
+				result += "\n" + com.GetCppOnUpdate();
+			return result + "\n" + _graphComp.GetCppOnUpdate();
+		}
+		/// <summary>return all components necessary OnStart code</summary>
+		public string GetComponentsOnStart()
+		{
+			string result = "";
+			foreach (var com in _components)
+				result += "\n" + com.GetCppOnStart();
+			return result + "\n" + _graphComp.GetCppOnStart();
 		}
 	}
 }

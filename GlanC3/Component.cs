@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GC
+namespace Glc
 {
 	namespace Component
 	{
@@ -21,9 +21,9 @@ namespace GC
 			public abstract string GetCppMethods();
 			public abstract string GetCppConstructor();
 			public abstract string GetCppConstructorBody();
-			public abstract string GetCppOnStart();
-			public abstract string GetCppOnRender();
 			public abstract string GetCppOnUpdate();
+			public abstract string GetCppOnRender();
+			public abstract string GetCppOnStart();
 		}
 		public abstract class GraphicalComponent: Component
 		{
@@ -41,7 +41,6 @@ namespace GC
 						return "an error was occured in _AnimationTypeToString()";
 				}
 			}
-			public abstract string GetCppOnRender();
 			public class StaticSprite : GraphicalComponent
 			{
 				string FileName;
@@ -51,26 +50,34 @@ namespace GC
 				}
 				public override string GetCppVariables()
 				{
-					return Glance.presets["Com:StaticSprite:Vars"];
+					return Glance.templates["Com:StaticSprite:Vars"];
 				}
 				public override string GetCppMethods()
 				{
-					return Glance.presets["Com:StaticSprite:Methods"];
+					return Glance.templates["Com:StaticSprite:Methods"];
 				}
 				public override string GetCppConstructor()
 				{
-					return Glance.presets["Com:StaticSprite:Constructor"];
+					return Glance.templates["Com:StaticSprite:Constructor"];
 				}
 				public override string GetCppConstructorBody()
 				{
-					return Glance.presets["Com:StaticSprite:ConstructorBody"].Replace("#FileName#", Glance.ToCppString(FileName)); 
+					return Glance.templates["Com:StaticSprite:ConstructorBody"].Replace("#FileName#", Glance.ToCppString(FileName));
+				}
+				public override string GetCppOnUpdate()
+				{
+					return Glance.templates["Com:StaticSprite:OnUpdate"];
 				}
 				public override string GetCppOnRender()
 				{
-					return Glance.presets["Com:StaticSprite:OnRender"];
+					return Glance.templates["Com:StaticSprite:OnRender"];
+				}
+				public override string GetCppOnStart()
+				{
+					return Glance.templates["Com:StaticSprite:OnUpdate"];
 				}
 			}
-			public class Animation : GraphicalComponent//не работает :(((
+			public class Animation : GraphicalComponent
 			{
 				AnimationType _AnimationType;
 
@@ -80,44 +87,100 @@ namespace GC
 				}
 				public override string GetCppVariables()
 				{
-					return Glance.presets["Com:Animation:Vars"].Replace("#AnimationTypeName#", _AnimationTypeToString(_AnimationType));
+					return Glance.templates["Com:Animation:Vars"].Replace("#AnimationTypeName#", _AnimationTypeToString(_AnimationType));
 				}
 				public override string GetCppMethods()
 				{
-					return Glance.presets["Com:Animation:Methods"].Replace("#AnimationTypeName#", _AnimationTypeToString(_AnimationType));
+					return Glance.templates["Com:Animation:Methods"].Replace("#AnimationTypeName#", _AnimationTypeToString(_AnimationType));
 				}
 				public override string GetCppConstructor()
 				{
-					return Glance.presets["Com:Animation:Constructor"];
-				}
-				public override string GetCppOnRender()
-				{
-					return Glance.presets["Com:Animation:OnRender"];
+					return Glance.templates["Com:Animation:Constructor"];
 				}
 				public override string GetCppConstructorBody()
 				{
-					return Glance.presets["Com:Animation:ConstructorBody"];
+					return Glance.templates["Com:Animation:ConstructorBody"];
+				}
+				public override string GetCppOnUpdate()
+				{
+					return Glance.templates["Com:Animation:OnUpdate"];
+				}
+				public override string GetCppOnRender()
+				{
+					return Glance.templates["Com:Animation:OnRender"];
+				}
+				public override string GetCppOnStart()
+				{
+					return Glance.templates["Com:Animation:OnStart"];
 				}
 			}
 		}
-		public class SoundSource : Component
+		public class Script: Component
 		{
-			public SoundSource(){}
+			public string[] Data;
+			private string _GetMethod(string sign)
+			{
+				char[] cymbolsToTrim = { ' ', '\t' };
+				byte tabs = 0;
+				string result = "";
+				bool isInsideMethod = false;
+				foreach (var i in Data)
+				{
+					var str = i.Trim(cymbolsToTrim);
+					if (str == "" || str == null) continue;
+					if (str == sign)
+					{
+						result += str;
+						isInsideMethod = true;
+						continue;
+					}
+					if (str == (sign + '{'))
+						isInsideMethod = true;
+					if (isInsideMethod)
+					{
+						if (str[str.Length - 1] == '{')
+							++tabs;
+						if (str[0] == '}')
+							--tabs;
+						if (tabs == 0)
+							isInsideMethod = false;
+						result += str;
+					}
+				}
+				return result;
+			}
 			public override string GetCppVariables()
 			{
-				return Glance.presets["Com:SoundSource:Vars"];
-			}
-			public override string GetCppMethods()
-			{
-				return Glance.presets["Com:SoundSource:Methods"];
+				return "";
 			}
 			public override string GetCppConstructor()
 			{
-				return Glance.presets["Com:SoundSource:Constructor"];
+				return "";
 			}
 			public override string GetCppConstructorBody()
 			{
-				return Glance.presets["Com:SoundSource:ConstructorBody"];
+				return "";
+			}
+			public override string GetCppMethods()
+			{
+				//here all logic
+				return "static_cast(false);";
+			}
+			public override string GetCppOnUpdate()
+			{
+				return _GetMethod("void onUpdate(const float & dt)"); 
+			}
+			public override string GetCppOnRender()
+			{
+				return _GetMethod("const sf::Sprite & onRender(::gc::Camera & cam)"); 
+			}
+			public override string GetCppOnStart()
+			{
+				return _GetMethod("void onStart()");
+			}
+			public bool Validate()
+			{
+				return true;
 			}
 		}
 	}

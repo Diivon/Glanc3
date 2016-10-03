@@ -4,7 +4,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-namespace GC
+namespace Glc
 {
     public static partial class Glance
     {
@@ -41,7 +41,7 @@ namespace GC
 		///<summary>files, that compiler will compile/link (.cpp/.lib)</summary>
 		public static List<string> complilerTargets;
 		///<summary>collection of code presets for all occasions(Class templates as example)</summary>
-		public static Dictionary<string, string> presets;
+		public static Dictionary<string, string> templates;
 		///<summary>else settings for building</summary>
 		public static Dictionary<string, string> settings;
 		///<summary>collection of all SpriteObjects, which must be in app</summary>
@@ -104,14 +104,16 @@ namespace GC
 			linkerKeys = "";
 			libs = new List<string>();
 			complilerTargets = new List<string>();
-			presets = new Dictionary<string, string>();
+			templates = new Dictionary<string, string>();
 			settings = new Dictionary<string, string>();
 
 			PhysicalObjects = new List<PhysicalObject>();
 		}
 		public static void Init()
 		{
-			ParseGCS(File.ReadAllLines(settingsDir + "presets.gcs"), ref presets);
+			var files = Directory.GetFiles(settingsDir, "T_*.gcs");
+			foreach (var file in files)
+				ParseGCS(File.ReadAllLines(file), ref templates);
 			ParseGCS(File.ReadAllLines(settingsDir + "settings.gcs"), ref settings);
 		}
 		///<summary>parse Glance settings(.gcs) file</summary>
