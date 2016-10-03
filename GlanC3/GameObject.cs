@@ -50,6 +50,7 @@ namespace GC
 				result += com.GetCppMethods() + '\n';
 			return result + _graphComp.GetCppMethods() + '\n';
 		}
+		/// <summary>return all components necessary Constructors</summary>
 		public string GetComponentsConstructors()
 		{
 			string result = "";
@@ -57,6 +58,7 @@ namespace GC
 				result += ", " + com.GetCppConstructor();
 			return result + ", " + _graphComp.GetCppConstructor();
 		}
+		/// <summary>return all components necessary Constructor code</summary>
 		public string GetComponentsConstructorsBody()
 		{
 			string result = "";
@@ -64,6 +66,7 @@ namespace GC
 				result += "\n" + com.GetCppConstructorBody();
 			return result + "\n" + _graphComp.GetCppConstructorBody();
 		}
+		/// <summary>return all components necessary OnRender code</summary>
 		public string GetGraphicalComponentOnRender()
 		{
 			return _graphComp.GetCppOnRender();

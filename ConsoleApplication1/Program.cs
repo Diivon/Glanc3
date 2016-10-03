@@ -31,7 +31,7 @@ class Program {
 		//-------------Client code starts here
 
 		var Obj = new GC.PhysicalObject(new Vec2(200, 200));
-		Obj.SetGraphicalComponent(new GC.Component.GraphicalComponent.StaticSprite(@"resources\sea.jpg"));
+		Obj.SetGraphicalComponent(new GC.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg"));
 		Glance.PhysicalObjects.Add(Obj);
 
 		//-------------Client code ends here
