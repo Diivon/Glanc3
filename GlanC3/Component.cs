@@ -21,6 +21,9 @@ namespace GC
 			public abstract string GetCppMethods();
 			public abstract string GetCppConstructor();
 			public abstract string GetCppConstructorBody();
+			public abstract string GetCppOnStart();
+			public abstract string GetCppOnRender();
+			public abstract string GetCppOnUpdate();
 		}
 		public abstract class GraphicalComponent: Component
 		{
