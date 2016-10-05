@@ -31,27 +31,29 @@ class Program {
 		Glance.isRunAppAfterCompiling = true;
 		Glance.Init();
 		//-------------Client code starts here
-		var scene = new Scene();
+
 		
+		var scene = new Scene();
 		
 		var Obj = new PhysicalObject(new Vec2(200, 200));
 		Obj.SetGraphicalComponent(new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg"));
 		scene.ObjectList.Add(Obj);
 
 		var o1 = new PhysicalObject(new Vec2(10, 20));
-		//o1.AddComponent(new Glc.Component.Script(File.ReadAllLines(@"C:\Users\Влад\Desktop\kek.cpp")));
-		o1.SetGraphicalComponent(new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\2.jpg"));
+		var anim = new Glc.Component.GraphicalComponent.Animation(Glc.Component.AnimationType.Cyclic);
+		anim.AddFrame(@"resources\n\1.jpg", 500);
+		anim.AddFrame(@"resources\n\2.jpg", 500);
+		anim.AddFrame(@"resources\n\3.jpg", 500);
+		anim.AddFrame(@"resources\n\4.jpg", 500);
+		o1.SetGraphicalComponent(anim);
+		//o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
+		o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\jaj.cpp"));
 		scene.ObjectList.Add(o1);
 
 		Glance.scenes.Add(scene);
-		/*
-		Glc.Component.Script scr = new Glc.Component.Script();
-		scr.Data = System.IO.File.ReadAllLines(@"C:\Users\Влад\Desktop\kek.cpp");
-		var s = scr.GetCppOnStart();
-		Console.Write(s);
-		Console.ReadKey();*/
 
 		//-------------Client code ends here
+
 		Glance.Build();
     }
 }

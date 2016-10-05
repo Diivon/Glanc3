@@ -57,7 +57,7 @@ namespace Glc
 		{
 			string result = "";
 			foreach (var i in ObjectList)
-				result += i.ObjectName + ".onRender();\n";
+				result += i.ObjectName + ".onRender()";
 			return result;
 		}
 	}

@@ -80,10 +80,20 @@ namespace Glc
 			public class Animation : GraphicalComponent
 			{
 				AnimationType _AnimationType;
+				List<SpriteFrame> Frames;
 
 				public Animation(AnimationType t)
 				{
 					_AnimationType = t;
+					Frames = new List<SpriteFrame>();
+				}
+				public void AddFrame(SpriteFrame sf)
+				{
+					Frames.Add(sf);
+				}
+				public void AddFrame(string path, float dur)
+				{
+					Frames.Add(new SpriteFrame(path, dur));
 				}
 				public override string GetCppVariables()
 				{
@@ -99,7 +109,10 @@ namespace Glc
 				}
 				public override string GetCppConstructorBody()
 				{
-					return Glance.templates["Com:Animation:ConstructorBody"];
+					string code = "";
+					foreach (var i in Frames)
+						code += "_anim.emplaceFrame(" + Glance.ToCppString(i.PicName) + ", " + i.Duration.ToString("0.00").Replace(',', '.') + "f);\n"; 
+					return Glance.templates["Com:Animation:ConstructorBody"].Replace("#SpriteFrames#", code);
 				}
 				public override string GetCppOnUpdate()
 				{
@@ -117,34 +130,54 @@ namespace Glc
 		}
 		public class Script: Component
 		{
-			public string[] Data;
+			public string file;
+			///<summary>do not return signature </summary>
 			private string _GetMethod(string sign)
 			{
+				//ochen pizdec, sorry
+				///cymbols to trim:)
 				char[] cymbolsToTrim = { ' ', '\t' };
-				byte tabs = 0;
+				///all strings from script file
+				string[] Data = System.IO.File.ReadAllLines(file);
+				///tabs count on moment, when searched method was found
+				byte methodTabs = 0;
+				///current tabs count
+				byte fileTabs = 0;
+				///...
 				string result = "";
+				///if we currently inside searched method body
 				bool isInsideMethod = false;
+
 				foreach (var i in Data)
 				{
-					var str = i.Trim(cymbolsToTrim);
-					if (str == "" || str == null) continue;
+					var str = i.Trim(cymbolsToTrim);//ready string for processing
+					if (str == "" || str == null) continue;//if nothing, skip
+
+					if (str.Contains('{'))
+						++fileTabs;
+					if (str.Contains('}'))
+						--fileTabs;
+
 					if (str == sign)
 					{
-						result += str;
 						isInsideMethod = true;
+						methodTabs = fileTabs;
 						continue;
 					}
-					if (str == (sign + '{'))
+					if(str == (sign + '{'))
+					{
 						isInsideMethod = true;
+						methodTabs = (byte)(fileTabs - 1);
+						continue;
+					}
 					if (isInsideMethod)
 					{
-						if (str[str.Length - 1] == '{')
-							++tabs;
-						if (str[0] == '}')
-							--tabs;
-						if (tabs == 0)
+						if (fileTabs == methodTabs)//if we at the end of method
+						{
 							isInsideMethod = false;
-						result += str;
+						}
+						else
+							result += str;
 					}
 				}
 				return result;
@@ -163,8 +196,7 @@ namespace Glc
 			}
 			public override string GetCppMethods()
 			{
-				//here all logic
-				return "static_cast(false);";
+				return "";
 			}
 			public override string GetCppOnUpdate()
 			{
@@ -182,9 +214,9 @@ namespace Glc
 			{
 				return true;
 			}
-			public Script(string[] data)
+			public Script(string filepath)
 			{
-				Data = data;
+				file = filepath;
 			}
 		}
 	}

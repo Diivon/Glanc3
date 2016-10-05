@@ -41,9 +41,9 @@ namespace Glc
 		///<summary>files, that compiler will compile/link (.cpp/.lib)</summary>
 		public static List<string> complilerTargets;
 		///<summary>collection of code presets for all occasions(Class templates as example)</summary>
-		public static Dictionary<string, string> templates;
+		internal static Dictionary<string, string> templates;
 		///<summary>else settings for building</summary>
-		public static Dictionary<string, string> settings;
+		internal static Dictionary<string, string> settings;
 		/// <summary>Contain all scene of the game</summary>
 		public static List<Scene> scenes;
 
@@ -76,7 +76,7 @@ namespace Glc
 				cmd.StartInfo.RedirectStandardInput = true;
 				cmd.StartInfo.UseShellExecute = false;
 				cmd.Start();
-				cmd.StandardInput.WriteLine(Glance.settingsDir + Glance.settings["EnvVarsConfig"]);
+				cmd.StandardInput.WriteLine(Glance.settingsDir + Glance.settings["B:EnvVarsConfig"]);
 				cmd.StandardInput.WriteLine(Glance.CreateApplication());
 				if (Glance.isRunAppAfterCompiling)
 				{
