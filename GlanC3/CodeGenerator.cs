@@ -40,24 +40,28 @@ namespace Glc
 			///<summary>write data + '\n' -> fs considering TabCount</summary>
 			internal static void WriteLnIn(FileStream fs, string data)
 			{
-				TabCount = 0;
 				if (data == null)
 					return;
-				if (data[data.Length - 1] == '{') ++TabCount;
-				if (data[0] == '}') --TabCount;
-				string tabs = "";
-				for (byte i = 0; i < TabCount; ++i)
-					tabs += '\t';
-				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs) + '\n');
-				fs.Write(kek, 0, kek.Length);
+				string[] strings = data.Split('\n');
+				byte tabcount = 0;
+				foreach(var str in strings)
+				{
+					if (str.Contains('{'))
+						++tabcount;
+					if (str.Contains('}'))
+						--tabcount;
+					string finalstr = "";
+					for (byte i = 0; i < tabcount; ++i)
+						finalstr += '\t';
+					finalstr += str.Trim(new char[] { '\t', ' '});
+					byte[] finalBytes = Encoding.Unicode.GetBytes(finalstr + '\n');
+					fs.Write(finalBytes, 0, finalBytes.Length);
+				}
 			}
 			///<summary>write data -> fs considering TabCount</summary>
 			internal static void WriteIn(FileStream fs, string data)
 			{
-				string tabs = "";
-				for (byte i = 0; i < TabCount; ++i)
-					tabs += '\t';
-				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs));
+				byte[] kek = Encoding.Unicode.GetBytes(data);
 				fs.Write(kek, 0, kek.Length);
 			}
 			///<summary>write "StandartIncludes" from settings.gcs -> fs</summary>
@@ -73,25 +77,24 @@ namespace Glc
 
 				WriteLn("#include \"main.h\"");
 				WriteLn("int main(){");
-				WriteLn("sf::RenderWindow window(sf::VideoMode(800,600), \"kek\", sf::Style::Close);");
-				WriteLn("gc::Camera mainCamera(gc::Vec2(0, 0), window);");
+				WriteLn("gc::Camera mainCamera(gc::Vec2(0, 0), sf::VideoMode(800,600), \"kek\", sf::Style::Close);");
 				WriteLn("float dt = 0.5f;");
 				WriteLn(scenes[0].ClassName + ' ' + scenes[0].ObjectName + ";");
 				WriteLn("\n");
 				WriteLn(scenes[0].ObjectName + ".start();");//start
-				WriteLn("while(window.isOpen()){");
+				WriteLn("while(mainCamera.isOpen()){");
 				WriteLn("sf::Event event;");
-				WriteLn("while(window.pollEvent(event)){");
-				WriteLn("if(event.type == sf::Event::Closed){window.close(); continue;}");
+				WriteLn("while(mainCamera.pollEvent(event)){");
+				WriteLn("if(event.type == sf::Event::Closed){mainCamera.close(); continue;}");
 				WriteLn("}");//poll event
 
-				WriteLn("window.clear();");
+				WriteLn("mainCamera.clear();");
 
 				WriteLn(scenes[0].ObjectName + ".update(dt);");//update
 
 				WriteLn(scenes[0].ObjectName + ".render(mainCamera);");//render
 
-				WriteLn("window.display();");
+				WriteLn("mainCamera.display();");
 				WriteLn("}");//while window is open
 				WriteLn("}");//main end
 
@@ -138,13 +141,16 @@ namespace Glc
 				for(int i = 0; i < S.ObjectList.Count - 1; ++i)
 					ctors += S.ObjectList[i].ObjectName + "(), ";
 				ctors += S.ObjectList[S.ObjectList.Count - 1].ObjectName + "()";
+				string render = "";
+				foreach (var obj in S.ObjectList)
+					render += "cam.render(" + obj.ObjectName + ".onRender());";
 				WriteLnIn(fs, templates["Scene:FDef"].
 												Replace("#ClassName#", S.ClassName).
 												Replace("#Objects#", Glance.GatherStringList(objects, '\n')).
 												Replace("#Ctors#", ctors).
 												Replace("#start#", S.GetAllObjectsOnStart()).
 												Replace("#update#", S.GetAllObjectsOnUpdate()).
-												Replace("#render#", S.GetAllObjectsOnRender())
+												Replace("#render#", render)
 							);
 			}
 			///<summary>Code generate</summary>

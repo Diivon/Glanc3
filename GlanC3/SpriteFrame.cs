@@ -6,9 +6,18 @@ using System.Threading.Tasks;
 
 namespace Glc
 {
-    class SpriteFrame
+    public class SpriteFrame
     {
 		public string PicName;
 		public float Duration; 
+		public SpriteFrame(string picName, float dur)
+		{
+			PicName = picName;
+			Duration = dur;
+		}
+		string GetCppCtor()
+		{
+			return "::gc::SpriteFrame(" + Glance.ToCppString(PicName) + ", " + Duration + "f);";
+		}
     }
 }
