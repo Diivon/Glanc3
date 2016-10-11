@@ -150,10 +150,7 @@ namespace Glc
 				for(int i = 0; i < S.ObjectList.Count - 1; ++i)
 					ctors += S.ObjectList[i].ObjectName + "(), ";
 				ctors += S.ObjectList[S.ObjectList.Count - 1].ObjectName + "()";
-				string render = "";
-				foreach (var obj in S.ObjectList)
-					render += "cam.render(" + obj.ObjectName + ".onRender());\n";
-				WriteLnIn(fs, templates["Сlass:Scene:FDef"].
+				WriteLnIn(fs, templates["Scene:FDef"].
 												Replace("#ClassName#", S.ClassName).
 												Replace("#Objects#", Glance.GatherStringList(objects, '\n')).
 												Replace("#Ctors#", ctors).
