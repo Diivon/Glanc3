@@ -58,7 +58,7 @@ namespace Glc
 					{
 						Directory.Delete(sourceDir, true);
 					}
-					catch (Exception e) { }
+					catch (Exception) { }
 					System.Threading.Thread.Sleep(50);
 					Directory.CreateDirectory(sourceDir);
 				}

@@ -46,7 +46,7 @@ class Program {
 		anim.AddFrame(@"resources\n\3.jpg", 500);
 		anim.AddFrame(@"resources\n\4.jpg", 500);
 		o1.SetGraphicalComponent(anim);
-		//o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
+		o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
 		o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\jaj.cpp"));
 		scene.ObjectList.Add(o1);
 
