@@ -72,35 +72,6 @@ namespace Glc
 			///<summary>horror, i know</summary>
 			internal static void writeMainCpp(FileStream fs)
 			{
-				/*
-				var temp = FStream;
-				FStream = fs;
-
-				WriteLn("#include \"main.h\"");
-				WriteLn("int main(){");
-				WriteLn("gc::Camera mainCamera(gc::Vec2(0, 0), sf::VideoMode(800,600), \"kek\", sf::Style::Close);");
-				WriteLn("float dt = 0.5f;");
-				WriteLn(scenes[0].ClassName + ' ' + scenes[0].ObjectName + ";");
-				WriteLn("\n");
-				WriteLn(scenes[0].ObjectName + ".start();");//start
-				WriteLn("while(mainCamera.isOpen()){");
-				WriteLn("sf::Event event;");
-				WriteLn("while(mainCamera.pollEvent(event)){");
-				WriteLn("if(event.type == sf::Event::Closed){mainCamera.close(); continue;}");
-				WriteLn("}");//poll event
-
-				WriteLn("mainCamera.clear();");
-
-				WriteLn(scenes[0].ObjectName + ".update(dt);");//update
-
-				WriteLn(scenes[0].ObjectName + ".render(mainCamera);");//render
-
-				WriteLn("mainCamera.display();");
-				WriteLn("}");//while window is open
-				WriteLn("}");//main end
-
-				FStream = temp;
-				*/
 				string Sub_include = "#include \"main.h\"";
 				WriteLnIn(fs,
 							templates["File:Main:Def"].

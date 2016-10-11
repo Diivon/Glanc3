@@ -54,12 +54,8 @@ namespace Glc
 			{
 				if (Glance.isClearSrcDir)
 				{
-					try
-					{
-						Directory.Delete(sourceDir, true);
-					}
-					catch (Exception) { }
-					System.Threading.Thread.Sleep(50);
+					//вышестоящий перехватит, и обработает
+					Directory.Delete(sourceDir, true);
 					Directory.CreateDirectory(sourceDir);
 				}
 				Glance.CodeGenerator.GenerateCode();
