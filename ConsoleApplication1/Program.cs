@@ -7,28 +7,28 @@ using System;
 class Program {
     static void Main(string[] args) {
 
-		Glance.outputDir =		@"D:\GC\out\";
-		Glance.sourceDir =		@"D:\GC\src\";
-		Glance.includeDir =		@"D:\GC\include\";
-		Glance.libDir =			@"D:\GC\lib\SFML\";
-		Glance.settingsDir =	@"D:\GC\settings\";
+		Glance.BuildSetting.outputDir =		@"D:\GC\out\";
+		Glance.BuildSetting.sourceDir =		@"D:\GC\src\";
+		Glance.BuildSetting.includeDir =		@"D:\GC\include\";
+		Glance.BuildSetting.libDir =			@"D:\GC\lib\SFML\";
+		Glance.BuildSetting.settingsDir =	@"D:\GC\settings\";
 
-		Glance.libs.Add("sfml-graphics.lib");
-		Glance.libs.Add("sfml-window.lib");
-		Glance.libs.Add("sfml-system.lib");
-		Glance.libs.Add("sfml-audio.lib");
-		Glance.libs.Add("sfml-network.lib");
-		Glance.complilerTargets.AddRange(Glance.libs);
+		Glance.BuildSetting.libs.Add("sfml-graphics.lib");
+		Glance.BuildSetting.libs.Add("sfml-window.lib");
+		Glance.BuildSetting.libs.Add("sfml-system.lib");
+		Glance.BuildSetting.libs.Add("sfml-audio.lib");
+		Glance.BuildSetting.libs.Add("sfml-network.lib");
+		Glance.BuildSetting.complilerTargets.AddRange(Glance.BuildSetting.libs);
 
-		Glance.compilerKeys =	@"/EHsc " + " /I" + Glance.sourceDir + " /I" + Glance.includeDir;
-		Glance.linkerKeys =		@"/LIBPATH:" + Glance.libDir;
+		Glance.BuildSetting.compilerKeys =	@"/EHsc " + " /I" + Glance.BuildSetting.sourceDir + " /I" + Glance.BuildSetting.includeDir;
+		Glance.BuildSetting.linkerKeys =		@"/LIBPATH:" + Glance.BuildSetting.libDir;
 
-		Glance.exeName = "main.exe";
+		Glance.BuildSetting.exeName = "main.exe";
 
-		Glance.isClearSrcDir = true;
-		Glance.isGenerateCode = true;
-		Glance.isCompile = true;
-		Glance.isRunAppAfterCompiling = true;
+		Glance.BuildSetting.isClearSrcDir = true;
+		Glance.BuildSetting.isGenerateCode = true;
+		Glance.BuildSetting.isCompile = true;
+		Glance.BuildSetting.isRunAppAfterCompiling = true;
 		Glance.Init();
 		//-------------Client code starts here
 

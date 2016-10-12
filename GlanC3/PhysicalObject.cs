@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace Glc
 {
@@ -20,9 +17,12 @@ namespace Glc
 		}
 		override public void GenerateFile()
 		{
-			FilePath = Glance.sourceDir + ClassName + ".h";
-			var fs = System.IO.File.Create(FilePath);
+			if (_filePath == "" || _filePath == null)
+				throw new Exception("file do not exist, when GenerateFile called");
+			Console.WriteLine("Glance.CodeGenerator.writePhysicalObject" + _filePath);
+			var fs = File.Open(_filePath, FileMode.Append);
 			Glance.CodeGenerator.writePhysicalObject(fs, this);
+			fs.Close();
 		}
 	}
 }

@@ -69,7 +69,7 @@ namespace Glc
 			{
 				WriteLnIn(fs, templates["Set:StandartIncludes:Def"]);
 			}
-			///<summary>horror, i know</summary>
+			///<summary></summary>
 			internal static void writeMainCpp(FileStream fs)
 			{
 				string Sub_include = "#include \"main.h\"";
@@ -91,17 +91,18 @@ namespace Glc
 			///<summary>write SpriteObject template from settings.gcs -> fs</summary>
 			internal static void writePhysicalObject(FileStream fs, PhysicalObject PO)
 			{
+
 				writeStdInc(fs);
-				WriteLnIn(fs, templates["Class:PhysicalObject:FDef"].
-									Replace("#ComponentsVariables#", PO.GetComponentsVariables()).
-									Replace("#Pos#" , PO.Pos.ToCppCtor()).
-									Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors()).
-									Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody()).
-									Replace("#ComponentsMethods#", PO.GetComponentsMethods()).
-									Replace("#OnUpdate#", PO.GetComponentsOnUpdate()).
-									Replace("#OnRender#", PO.GetComponentsOnRender()).
-									Replace("#OnStart#", PO.GetComponentsOnStart()).
-									Replace("#ClassName#", PO.ClassName)
+				WriteLnIn(fs, templates["Class:PhysicalObject:FDef"]
+									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
+									.Replace("#Pos#" , PO.Pos.ToCppCtor())
+									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
+									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
+									.Replace("#ComponentsMethods#", PO.GetComponentsMethods())
+									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
+									.Replace("#OnRender#", PO.GetComponentsOnRender())
+									.Replace("#OnStart#", PO.GetComponentsOnStart())
+									.Replace("#ClassName#", PO.ClassName)
 							);
 			}
 			internal static void writeScene(FileStream fs, Scene S)
@@ -140,23 +141,24 @@ namespace Glc
 				{
 					if (SO.FilePath == null)
 					{
-						var SOfs = File.Create(sourceDir + SO.ClassName + ".h");
-						writePhysicalObject(SOfs, SO as PhysicalObject);
-						SOfs.Close();
+						string filename = BuildSetting.sourceDir + SO.ClassName + ".h";
+						File.Create(filename).Close();
+						SO.FilePath = filename;
 					}
+					SO.GenerateFile();
 				}
-
-				var Scfs = File.Create(sourceDir + scenes[0].ClassName + ".h");
-				writeScene(Scfs, scenes[0]);
-				Scfs.Close();
-
 				{
-					var mainHfs = File.Create(sourceDir + "main.h");
+					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].ClassName + ".h");
+					writeScene(Scfs, scenes[0]);
+					Scfs.Close();
+				}
+				{
+					var mainHfs = File.Create(BuildSetting.sourceDir + "main.h");
 					writeMainH(mainHfs);
 					mainHfs.Close();
 				}
 				{
-					var MainCppfs = File.Create(sourceDir + "main.cpp");
+					var MainCppfs = File.Create(BuildSetting.sourceDir + "main.cpp");
 					writeMainCpp(MainCppfs);
 					MainCppfs.Close();
 				}

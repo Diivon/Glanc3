@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Glc
 {
 	public abstract class GameObject
 	{
-		private string _className;
+		protected string _className;
 		public string ClassName
 		{
 			set
@@ -19,7 +20,7 @@ namespace Glc
 			}
 			get { return _className; }
 		}
-		private string _objectName;
+		protected string _objectName;
 		public string ObjectName
 		{
 			set
@@ -31,6 +32,7 @@ namespace Glc
 			get { return _objectName; }
 		}
 		public bool IsRenderableAtStart;
+		protected string _filePath;
 
 		/// <summary>Components of this object</summary>
 		protected List<Component.Component> _components;
@@ -38,11 +40,20 @@ namespace Glc
 		protected Component.GraphicalComponent _graphComp;
 		/// <summary>Path to .h file of this Object</summary>
 		/// <remarks>Не хакай, плз</remarks>
-		public string FilePath { get; protected set; }
+		public string FilePath
+		{
+			get { return _filePath; }
+			set
+			{
+				if (File.Exists(value))
+					_filePath = value;
+				else throw new Exception("invalid file path");
+			}
+		}
 
 		protected GameObject()
 		{
-			FilePath = null;
+			_filePath = null;
 			_components = new List<Component.Component>();
 		}
 		/// <summary>Generate .h file for this object</summary>
@@ -51,11 +62,6 @@ namespace Glc
 		public void SetGraphicalComponent(Component.GraphicalComponent c)
 		{
 			_graphComp = c;
-		}
-		/// <summary>return graphical component of this object</summary>
-		public Component.GraphicalComponent GetGraphicalComponent()
-		{
-			return _graphComp;
 		}
 		/// <summary>Add component to this object</summary>
 		public void AddComponent(Component.Component c)
