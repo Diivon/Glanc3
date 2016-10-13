@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Glc
 {
@@ -35,7 +33,7 @@ namespace Glc
 		static Scene() { _count = 0; }
 		public Scene()
 		{
-			ClassName = "Scene" + _count;
+			ClassName = "Scene" + _count++;
 			ObjectName = "Obj" + ClassName;
 			ObjectList = new List<GameObject>();
 		}
