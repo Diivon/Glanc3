@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Diagnostics;
 using System.Collections.Generic;
 
@@ -76,14 +75,19 @@ namespace Glc
 				AnimatorType = "animator_t";
 			}
 		}
-		///<summary>collection of code presets for all occasions(Class templates as example)</summary>
-		internal static Dictionary<string, string> templates;
-		///<summary>else settings for building</summary>
-		internal static Dictionary<string, string> settings;
 		/// <summary>Contain all scene of the game</summary>
 		public static List<Scene> scenes;
-
-		///<summary>Buid application by rules</summary>
+		public static void AddScene(Scene s)
+		{
+			scenes.Add(s);
+		}
+		public static void Init()
+		{
+			var files = Directory.GetFiles(BuildSetting.settingsDir, "T_*.gcs");
+			foreach (var file in files)
+				ParseGCS(File.ReadAllLines(file), ref templates);
+			ParseGCS(File.ReadAllLines(BuildSetting.settingsDir + "settings.gcs"), ref settings);
+		}
 		public static void Build()
 		{
 			if (BuildSetting.isGenerateCode)
@@ -124,8 +128,15 @@ namespace Glc
 			}
 			Console.ReadKey();
 		}
+
+		///<summary>collection of code presets for all occasions(Class templates as example)</summary>
+		internal static Dictionary<string, string> templates;
+		///<summary>else settings for building</summary>
+		internal static Dictionary<string, string> settings;
+
+		///<summary>Buid application by rules</summary>
 		///<summary>return string, which call compiler correctly</summary>
-		private static string CreateApplication()
+		internal static string CreateApplication()
         {
             if (!Directory.Exists(BuildSetting.sourceDir))
                 Directory.CreateDirectory(BuildSetting.sourceDir);
@@ -134,20 +145,6 @@ namespace Glc
 			return "cl.exe " + BuildSetting.compilerKeys + ' ' + @"/Fe" + BuildSetting.outputDir + ' ' + BuildSetting.sourceDir + @"main.cpp " + GatherStringList(BuildSetting.complilerTargets, ' ') + " /link" + ' ' + BuildSetting.linkerKeys;
 		}
 
-		static Glance()
-		{
-			templates = new Dictionary<string, string>();
-			settings = new Dictionary<string, string>();
-
-			scenes = new List<Scene>();
-		}
-		public static void Init()
-		{
-			var files = Directory.GetFiles(BuildSetting.settingsDir, "T_*.gcs");
-			foreach (var file in files)
-				ParseGCS(File.ReadAllLines(file), ref templates);
-			ParseGCS(File.ReadAllLines(BuildSetting.settingsDir + "settings.gcs"), ref settings);
-		}
 		///<summary>parse Glance settings(.gcs) file</summary>
 		internal static void ParseGCS(string[] strings, ref System.Collections.Generic.Dictionary<string, string> dict)
 		{
@@ -182,6 +179,13 @@ namespace Glc
 		internal static string ToCppString(string s)
 		{
 			return '"' + s.Replace(@"\", @"\\") + '"';
+		}
+		static Glance()
+		{
+			templates = new Dictionary<string, string>();
+			settings = new Dictionary<string, string>();
+
+			scenes = new List<Scene>();
 		}
 	}//class Glance
 }//ns GC

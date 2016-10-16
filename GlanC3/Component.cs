@@ -17,17 +17,17 @@ namespace Glc
 
 		public abstract class Component
 		{
-			public abstract string GetCppVariables();
-			public abstract string GetCppMethods();
-			public abstract string GetCppConstructor();
-			public abstract string GetCppConstructorBody();
-			public abstract string GetCppOnUpdate();
-			public abstract string GetCppOnRender();
-			public abstract string GetCppOnStart();
+			internal abstract string GetCppVariables();
+			internal abstract string GetCppMethods();
+			internal abstract string GetCppConstructor();
+			internal abstract string GetCppConstructorBody();
+			internal abstract string GetCppOnUpdate();
+			internal abstract string GetCppOnRender();
+			internal abstract string GetCppOnStart();
 		}
 		public abstract class GraphicalComponent: Component
 		{
-			public static string _AnimationTypeToString(AnimationType t)
+			internal static string _AnimationTypeToString(AnimationType t)
 			{
 				switch (t)
 				{
@@ -44,35 +44,37 @@ namespace Glc
 			public class StaticSprite : GraphicalComponent
 			{
 				string FileName;
+				/// <summary></summary>
+				/// <param name="fn">File name of picture</param>
 				public StaticSprite(string fn)
 				{
 					FileName = fn;
 				}
-				public override string GetCppVariables()
+				internal override string GetCppVariables()
 				{
 					return Glance.templates["Com:StaticSprite:Vars"];
 				}
-				public override string GetCppMethods()
+				internal override string GetCppMethods()
 				{
 					return Glance.templates["Com:StaticSprite:Methods"];
 				}
-				public override string GetCppConstructor()
+				internal override string GetCppConstructor()
 				{
 					return Glance.templates["Com:StaticSprite:Constructor"];
 				}
-				public override string GetCppConstructorBody()
+				internal override string GetCppConstructorBody()
 				{
 					return Glance.templates["Com:StaticSprite:ConstructorBody"].Replace("#FileName#", Glance.ToCppString(FileName));
 				}
-				public override string GetCppOnUpdate()
+				internal override string GetCppOnUpdate()
 				{
 					return Glance.templates["Com:StaticSprite:OnUpdate"];
 				}
-				public override string GetCppOnRender()
+				internal override string GetCppOnRender()
 				{
 					return Glance.templates["Com:StaticSprite:OnRender"];
 				}
-				public override string GetCppOnStart()
+				internal override string GetCppOnStart()
 				{
 					return Glance.templates["Com:StaticSprite:OnUpdate"];
 				}
@@ -82,14 +84,7 @@ namespace Glc
 				AnimationType _AnimationType;
 				List<SpriteFrame> Frames;
 				
-				private string _GetProcessed(string a)
-				{
-					return a
-							.Replace("#AnimationType#", _AnimationTypeToString(_AnimationType))
-							.Replace("#AnimationTypeName#", Glance.NameSetting.AnimationType)
-							.Replace("#AnimationName#", Glance.NameSetting.AnimationName)
-							;
-				}
+				/// <summary>return processed string for GetCpp... family</summary>
 				public Animation(AnimationType t)
 				{
 					_AnimationType = t;
@@ -103,46 +98,96 @@ namespace Glc
 				{
 					Frames.Add(new SpriteFrame(path, dur));
 				}
-				public override string GetCppVariables()
+				internal override string GetCppVariables()
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:Vars"]);
 				}
-				public override string GetCppMethods()
+				internal override string GetCppMethods()
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:Methods"]);
 				}
-				public override string GetCppConstructor()
+				internal override string GetCppConstructor()
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:Constructor"]);
 				}
-				public override string GetCppConstructorBody()
+				internal override string GetCppConstructorBody()
 				{
 					string code = "";
 					foreach (var i in Frames)
 						code += Glance.NameSetting.AnimationName + ".emplaceFrame(" + Glance.ToCppString(i.PicName) + ", " + i.Duration.ToString("0.00").Replace(',', '.') + "f);\n"; 
 					return _GetProcessed(Glance.templates["Com:Animation:ConstructorBody"].Replace("#SpriteFrames#", code));
 				}
-				public override string GetCppOnUpdate()
+				internal override string GetCppOnUpdate()
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:OnUpdate"]);
 				}
-				public override string GetCppOnRender()
+				internal override string GetCppOnRender()
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:OnRender"]);
 				}
-				public override string GetCppOnStart()
+				internal override string GetCppOnStart()
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:OnStart"]);
+				}
+				private string _GetProcessed(string a)
+				{
+					return a
+							.Replace("#AnimationType#", _AnimationTypeToString(_AnimationType))
+							.Replace("#AnimationTypeName#", Glance.NameSetting.AnimationType)
+							.Replace("#AnimationName#", Glance.NameSetting.AnimationName)
+							;
 				}
 			}
 			public class Animator
 			{
-
+				//:)
 			}
 		}
 		public class Script: Component
 		{
 			public string file;
+			public void Validate()
+			{
+				string onUpdateCode = GetCppOnUpdate();
+				if (onUpdateCode.Contains(Glance.NameSetting.AnimationName + ".update"))
+					throw new Exception("Animation updated in script");
+				if (onUpdateCode.Contains(Glance.NameSetting.AnimatorName + ".update"))
+					throw new Exception("Animator updated in script");
+			}
+			public Script(string filepath)
+			{
+				file = filepath;
+			}
+			internal override string GetCppVariables()
+			{
+				return "";
+			}
+			internal override string GetCppConstructor()
+			{
+				return "";
+			}
+			internal override string GetCppConstructorBody()
+			{
+				return "";
+			}
+			internal override string GetCppMethods()
+			{
+				return "";
+			}
+			internal override string GetCppOnUpdate()
+			{
+				return _GetMethodBody("void onUpdate(const float & dt)"); 
+			}
+			internal override string GetCppOnRender()
+			{
+				return _GetMethodBody("const sf::Sprite & onRender(::gc::Camera & cam)"); 
+			}
+			internal override string GetCppOnStart()
+			{
+				return _GetMethodBody("void onStart()");
+			}
+			///<summary>if script is invalid throw exception. that will explain problem</summary>
+			/// <summary>Create script, linked to a file</summary>
 			///<summary>do not return signature </summary>
 			private string _GetMethodBody(string sign)
 			{
@@ -193,48 +238,6 @@ namespace Glc
 					}
 				}
 				return result;
-			}
-			public override string GetCppVariables()
-			{
-				return "";
-			}
-			public override string GetCppConstructor()
-			{
-				return "";
-			}
-			public override string GetCppConstructorBody()
-			{
-				return "";
-			}
-			public override string GetCppMethods()
-			{
-				return "";
-			}
-			public override string GetCppOnUpdate()
-			{
-				return _GetMethodBody("void onUpdate(const float & dt)"); 
-			}
-			public override string GetCppOnRender()
-			{
-				return _GetMethodBody("const sf::Sprite & onRender(::gc::Camera & cam)"); 
-			}
-			public override string GetCppOnStart()
-			{
-				return _GetMethodBody("void onStart()");
-			}
-			///<summary>if script is invalid throw exception. that will explain problem</summary>
-			public void Validate()
-			{
-				string onUpdateCode = GetCppOnUpdate();
-				if (onUpdateCode.Contains(Glance.NameSetting.AnimationName + ".update"))
-					throw new Exception("Animation updated in script");
-				if (onUpdateCode.Contains(Glance.NameSetting.AnimatorName + ".update"))
-					throw new Exception("Animator updated in script");
-			}
-			/// <summary>Create script, linked to a file</summary>
-			public Script(string filepath)
-			{
-				file = filepath;
 			}
 		}
 	}

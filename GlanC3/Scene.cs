@@ -37,21 +37,21 @@ namespace Glc
 			ObjectName = "Obj" + ClassName;
 			ObjectList = new List<GameObject>();
 		}
-		public string GetAllObjectsOnStart()
+		internal string GetAllObjectsOnStart()
 		{
 			string result = "";
 			foreach (var i in ObjectList)
 				result += i.ObjectName + ".onStart();\n";
 			return result;
 		}
-		public string GetAllObjectsOnUpdate()
+		internal string GetAllObjectsOnUpdate()
 		{
 			string result = "";
 			foreach (var i in ObjectList)
 				result += i.ObjectName + ".onUpdate(dt);\n";
 			return result;
 		}
-		public string GetAllObjectsOnRender()
+		internal string GetAllObjectsOnRender()
 		{
 			string result = "";
 			foreach (var i in ObjectList)
@@ -62,6 +62,12 @@ namespace Glc
 		{
 			go.Scn = this;
 			ObjectList.Add(go);
+		}
+		public void AddObjectsRange(GameObject[] gos)
+		{
+			foreach (var i in gos)
+				i.Scn = this;
+			ObjectList.AddRange(gos);
 		}
 	}
 }

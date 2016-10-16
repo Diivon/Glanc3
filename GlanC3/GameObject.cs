@@ -9,7 +9,6 @@ namespace Glc
 {
 	public abstract class GameObject
 	{
-		protected string _className;
 		public string ClassName
 		{
 			set
@@ -20,7 +19,6 @@ namespace Glc
 			}
 			get { return _className; }
 		}
-		protected string _objectName;
 		public string ObjectName
 		{
 			set
@@ -31,129 +29,147 @@ namespace Glc
 			}
 			get { return _objectName; }
 		}
-		public bool IsRenderableAtStart;
-		protected string _filePath;
+		/// <summary>Scene, where this object is</summary>
 		public Scene Scn;
 
 		/// <summary>Components of this object</summary>
-		protected List<Component.Component> _components;
-		/// <summary>Graphical component of this object</summary>
-		protected Component.GraphicalComponent _graphComp;
+		public List<Component.Component> Components;
+		/// <summary>Graphical components of this object</summary>
+		public Component.GraphicalComponent GraphComponent;
 		/// <summary>Path to .h file of this Object</summary>
 		/// <remarks>Не хакай, плз</remarks>
-		public string FilePath
+		public string ImplementationFilePath
 		{
-			get { return _filePath; }
+			get { return _implementationfilePath; }
 			set
 			{
 				if (File.Exists(value))
-					_filePath = value;
+					_implementationfilePath = value;
+				else throw new Exception("invalid file path");
+			}
+		}
+		public string DeclarationFilePath
+		{
+			get { return _declarationfilePath; }
+			set
+			{
+				if (File.Exists(value))
+					_declarationfilePath = value;
 				else throw new Exception("invalid file path");
 			}
 		}
 
+		protected string _objectName;
+		protected string _className;
+		protected string _implementationfilePath;
+		protected string _declarationfilePath;
+
 		protected GameObject()
 		{
-			_filePath = null;
-			_components = new List<Component.Component>();
+			_implementationfilePath = null;
+			_declarationfilePath = null;
+			Components = new List<Component.Component>();
+			GraphComponent = null;
 		}
-		/// <summary>Generate .h file for this object</summary>
-		public abstract void GenerateCode();
-		/// <summary>Only one graphical component exist for one object</summary>
-		public void SetGraphicalComponent(Component.GraphicalComponent c)
-		{
-			_graphComp = c;
-		}
-		/// <summary>Add component to this object</summary>
-		public void AddComponent(Component.Component c)
-		{
-			if (c is Component.GraphicalComponent)
-				throw new ArgumentException("Must not to give AddComponent() GraphicalComponent, use SetGraphicalComponent() instead");
-			_components.Add(c);
-		}
+		/// <summary>Generate .h and .cpp files for this object</summary>
+		internal abstract void GenerateCode();
 		/// <summary>return all components necessary Variables</summary>
-		public string GetComponentsVariables()
+		internal string GetComponentsVariables()
 		{
+			if (GraphComponent == null)
+				throw new Exception("Object " + ObjectName + " hasn't graphical component");
 			string result = "";
-			foreach (var com in _components)
+			foreach (var com in Components)
 			{
 				if (com.GetCppVariables() == "")
 					continue;
 				result += com.GetCppVariables() +'\n';
 			}
-			return result + _graphComp.GetCppVariables() + '\n';
+			return result + GraphComponent.GetCppVariables() + '\n';
 		}
 		/// <summary>return all components necessary Methods</summary>
-		public string GetComponentsMethods()
+		internal string GetComponentsMethods()
 		{
+			if (GraphComponent == null)
+				throw new Exception("Object " + ObjectName + " hasn't graphical component");
 			string result = "";
-			foreach (var com in _components)
+			foreach (var com in Components)
 			{
 				if (com.GetCppMethods() == "")
 					continue;
 				result += com.GetCppMethods() + '\n';
 			}
-			return result + _graphComp.GetCppMethods() + '\n';
+			return result + GraphComponent.GetCppMethods() + '\n';
 		}
 		/// <summary>return all components necessary Constructors</summary>
-		public string GetComponentsConstructors()
+		internal string GetComponentsConstructors()
 		{
+			if (GraphComponent == null)
+				throw new Exception("Object " + ObjectName + " hasn't graphical component");
 			string result = "";
-			foreach (var com in _components)
+			foreach (var com in Components)
 			{
 				if (com.GetCppConstructor() == "")
 					continue;
 				result += ", " + com.GetCppConstructor();
 			}
-			return result + ", " + _graphComp.GetCppConstructor();
+			return result + ", " + GraphComponent.GetCppConstructor();
 		}
 		/// <summary>return all components necessary Constructor code</summary>
-		public string GetComponentsConstructorsBody()
+		internal string GetComponentsConstructorsBody()
 		{
+			if (GraphComponent == null)
+				throw new Exception("Object " + ObjectName + " hasn't graphical component");
 			string result = "";
-			foreach (var com in _components)
+			foreach (var com in Components)
 			{
 				if (com.GetCppConstructorBody() == "")
 					continue;
 				result += "\n" + com.GetCppConstructorBody();
 			}
-			return result + "\n" + _graphComp.GetCppConstructorBody();
+			return result + "\n" + GraphComponent.GetCppConstructorBody();
 		}
 		/// <summary>return all components necessary OnRender code</summary>
-		public string GetComponentsOnRender()
+		internal string GetComponentsOnRender()
 		{
+			if (GraphComponent == null)
+				throw new Exception("Object " + ObjectName + " hasn't graphical component");
 			string result = "";
-			foreach (var com in _components)
+			foreach (var com in Components)
 			{
 				if (com.GetCppOnRender() == "")
 					continue;
 				result += "\n" + com.GetCppOnRender();
 			}
-			return result + "\n" + _graphComp.GetCppOnRender();
+			return result + "\n" + GraphComponent.GetCppOnRender();
 		}
 		/// <summary>return all components necessary OnUpdate code</summary>
-		public string GetComponentsOnUpdate()
+		internal string GetComponentsOnUpdate()
 		{
+			if (GraphComponent == null)
+				throw new Exception("Object " + ObjectName + " hasn't graphical component");
 			string result = "";
-			foreach (var com in _components)
+			foreach (var com in Components)
 			{
 				if (com.GetCppOnUpdate() == "")
 					continue;
 				result += "\n" + com.GetCppOnUpdate();
 			}
-			return result + "\n" + _graphComp.GetCppOnUpdate();
+			return result + "\n" + GraphComponent.GetCppOnUpdate();
 		}
 		/// <summary>return all components necessary OnStart code</summary>
-		public string GetComponentsOnStart()
+		internal string GetComponentsOnStart()
 		{
+			if (GraphComponent == null)
+				throw new Exception("Object " + ObjectName + " hasn't graphical component");
 			string result = "";
-			foreach (var com in _components)
+			foreach (var com in Components)
 			{
 				if (com.GetCppOnStart() == "")
 					continue;
 				result += "\n" + com.GetCppOnStart();
 			}
-			return result + "\n" + _graphComp.GetCppOnStart();
+			return result + "\n" + GraphComponent.GetCppOnStart();
 		}
 	}
 }

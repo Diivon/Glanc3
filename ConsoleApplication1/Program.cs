@@ -36,9 +36,9 @@ class Program {
 		var scene = new Scene();
 		
 		var Obj = new PhysicalObject(new Vec2(200, 200));
-		Obj.SetGraphicalComponent(new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg"));
+		Obj.GraphComponent = new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg");
 		scene.AddObject(Obj);
-
+		/*
 		var o1 = new PhysicalObject(new Vec2(10, 20));
 		var anim = new Glc.Component.GraphicalComponent.Animation(Glc.Component.AnimationType.Cyclic);
 		anim.AddFrame(@"resources\n\1.jpg", 500);
@@ -48,7 +48,7 @@ class Program {
 		o1.SetGraphicalComponent(anim);
 		o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
 		o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\jaj.cpp"));
-		scene.AddObject(o1);
+		scene.AddObject(o1);*/
 
 		Glance.scenes.Add(scene);
 

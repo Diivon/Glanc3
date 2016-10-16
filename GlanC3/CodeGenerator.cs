@@ -9,7 +9,7 @@ namespace Glc
 {
 	public static partial class Glance
 	{
-		public static partial class CodeGenerator
+		internal static partial class CodeGenerator
 		{
 			///<summary>FileStream for Write/WriteLn</summary>
 			internal static FileStream FStream;
@@ -89,13 +89,25 @@ namespace Glc
 					WriteLnIn(fs, "#include \"" + Scn.ClassName + ".h\"");
 			}
 			///<summary>write SpriteObject template from settings.gcs -> fs</summary>
-			internal static void writePhysicalObject(FileStream fs, PhysicalObject PO)
+			internal static void writePhysicalObject(FileStream declaration, FileStream implementation, PhysicalObject PO)
 			{
 
-				writeStdInc(fs);
-				WriteLnIn(fs, templates["Class:PhysicalObject:FDef"]
+				writeStdInc(declaration);
+				WriteLnIn(declaration, templates["Class:PhysicalObject:Declaration"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
 									.Replace("#Pos#" , PO.Pos.ToCppCtor())
+									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
+									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
+									.Replace("#ComponentsMethods#", PO.GetComponentsMethods())
+									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
+									.Replace("#OnRender#", PO.GetComponentsOnRender())
+									.Replace("#OnStart#", PO.GetComponentsOnStart())
+									.Replace("#ClassName#", PO.ClassName)
+									.Replace("#SceneName#", PO.Scn.ClassName)
+							);
+				WriteLnIn(implementation, templates["Class:PhysicalObject:Implementation"]
+									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
+									.Replace("#Pos#", PO.Pos.ToCppCtor())
 									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 									.Replace("#ComponentsMethods#", PO.GetComponentsMethods())
@@ -126,7 +138,7 @@ namespace Glc
 
 				string render = "";
 				foreach (var i in S.ObjectList)
-					render += "cam.render(" + i.ObjectName + ".onRender());";//renders
+					render += "cam.render(" + i.ObjectName + ".onRender(cam));";//renders
 
 				string getObjects = "";
 				foreach (var i in S.ObjectList)
@@ -143,16 +155,23 @@ namespace Glc
 							);					
 			}
 			///<summary>Code generate</summary>
-			public static void GenerateCode()
+			internal static void GenerateCode()
 			{
 				foreach (var SO in	scenes[0].ObjectList)
 				{
-					if (SO.FilePath == null)
+					if (SO.ImplementationFilePath == null || SO.ImplementationFilePath == "")
 					{
-						string filename = BuildSetting.sourceDir + SO.ClassName + ".h";
-						File.Create(filename).Close();
-						SO.FilePath = filename;
+						string implFileName = BuildSetting.sourceDir + SO.ClassName + ".cpp";
+						File.Create(implFileName).Close();
+						SO.ImplementationFilePath = implFileName;
 					}
+					if (SO.DeclarationFilePath == null || SO.DeclarationFilePath == "")
+					{
+						string declFileName = BuildSetting.sourceDir + SO.ClassName + ".h";
+						File.Create(declFileName).Close();
+						SO.DeclarationFilePath = declFileName;
+					}
+					Glance.BuildSetting.complilerTargets.Add(SO.ImplementationFilePath);
 					SO.GenerateCode();
 				}
 				{
