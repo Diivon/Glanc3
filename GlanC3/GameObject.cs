@@ -33,6 +33,7 @@ namespace Glc
 		}
 		public bool IsRenderableAtStart;
 		protected string _filePath;
+		public Scene Scn;
 
 		/// <summary>Components of this object</summary>
 		protected List<Component.Component> _components;
@@ -57,7 +58,7 @@ namespace Glc
 			_components = new List<Component.Component>();
 		}
 		/// <summary>Generate .h file for this object</summary>
-		public abstract void GenerateFile();
+		public abstract void GenerateCode();
 		/// <summary>Only one graphical component exist for one object</summary>
 		public void SetGraphicalComponent(Component.GraphicalComponent c)
 		{

@@ -103,36 +103,44 @@ namespace Glc
 									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
+									.Replace("#SceneName#", PO.Scn.ClassName)
 							);
 			}
 			internal static void writeScene(FileStream fs, Scene S)
 			{
 				writeStdInc(fs);
 				foreach(var obj in S.ObjectList)
-				{
-					WriteLnIn(fs, "#include \"" + obj.ClassName + ".h\"");
-				}
+					WriteLnIn(fs, "#include \"" + obj.ClassName + ".h\"");//includes
+
 				var objects = new List<string>();
 				foreach (var obj in S.ObjectList)
 				{
-					objects.Add("friend class " + obj.ClassName + ';');
-					objects.Add(obj.ClassName + ' ' + obj.ObjectName + ';');
+					objects.Add("friend class " + obj.ClassName + ';');//friend class
+					objects.Add(obj.ClassName + ' ' + obj.ObjectName + ';');//obj declarations
 				}//objects filling
+
 				string ctors = "";
-				for(int i = 0; i < S.ObjectList.Count - 1; ++i)
-					ctors += S.ObjectList[i].ObjectName + "(), ";
-				ctors += S.ObjectList[S.ObjectList.Count - 1].ObjectName + "()";
+				for(int i = 0; i < S.ObjectList.Count - 1; ++i)//
+					ctors += S.ObjectList[i].ObjectName + "(*this), ";//
+				ctors += S.ObjectList[S.ObjectList.Count - 1].ObjectName + "(*this)";//constructors
+
 				string render = "";
 				foreach (var i in S.ObjectList)
-					render += "cam.render(" + i.ObjectName + ".onRender());";
-				WriteLnIn(fs, templates["Сlass:Scene:FDef"].
-												Replace("#ClassName#", S.ClassName).
-												Replace("#Objects#", Glance.GatherStringList(objects, '\n')).
-												Replace("#Ctors#", ctors).
-												Replace("#start#", S.GetAllObjectsOnStart()).
-												Replace("#update#", S.GetAllObjectsOnUpdate()).
-												Replace("#render#", render)
-							);
+					render += "cam.render(" + i.ObjectName + ".onRender());";//renders
+
+				string getObjects = "";
+				foreach (var i in S.ObjectList)
+					getObjects += "template<>\n" + i.ClassName + " & getObject<" + i.ClassName + ">(){\nreturn " + i.ObjectName + ";\n}\n";
+
+				WriteLnIn(fs, templates["Сlass:Scene:FDef"]
+												.Replace("#ClassName#", S.ClassName)
+												.Replace("#Objects#", Glance.GatherStringList(objects, '\n'))
+												.Replace("#Ctors#", ctors)
+												.Replace("#start#", S.GetAllObjectsOnStart())
+												.Replace("#update#", S.GetAllObjectsOnUpdate())
+												.Replace("#render#", render)
+												.Replace("#getObjects#", getObjects)
+							);					
 			}
 			///<summary>Code generate</summary>
 			public static void GenerateCode()
@@ -145,7 +153,7 @@ namespace Glc
 						File.Create(filename).Close();
 						SO.FilePath = filename;
 					}
-					SO.GenerateFile();
+					SO.GenerateCode();
 				}
 				{
 					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].ClassName + ".h");

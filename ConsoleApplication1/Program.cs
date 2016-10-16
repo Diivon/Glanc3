@@ -9,8 +9,8 @@ class Program {
 
 		Glance.BuildSetting.outputDir =		@"D:\GC\out\";
 		Glance.BuildSetting.sourceDir =		@"D:\GC\src\";
-		Glance.BuildSetting.includeDir =		@"D:\GC\include\";
-		Glance.BuildSetting.libDir =			@"D:\GC\lib\SFML\";
+		Glance.BuildSetting.includeDir =	@"D:\GC\include\";
+		Glance.BuildSetting.libDir =		@"D:\GC\lib\SFML\";
 		Glance.BuildSetting.settingsDir =	@"D:\GC\settings\";
 
 		Glance.BuildSetting.libs.Add("sfml-graphics.lib");
@@ -21,7 +21,7 @@ class Program {
 		Glance.BuildSetting.complilerTargets.AddRange(Glance.BuildSetting.libs);
 
 		Glance.BuildSetting.compilerKeys =	@"/EHsc " + " /I" + Glance.BuildSetting.sourceDir + " /I" + Glance.BuildSetting.includeDir;
-		Glance.BuildSetting.linkerKeys =		@"/LIBPATH:" + Glance.BuildSetting.libDir;
+		Glance.BuildSetting.linkerKeys =	@"/LIBPATH:" + Glance.BuildSetting.libDir;
 
 		Glance.BuildSetting.exeName = "main.exe";
 
@@ -37,7 +37,7 @@ class Program {
 		
 		var Obj = new PhysicalObject(new Vec2(200, 200));
 		Obj.SetGraphicalComponent(new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg"));
-		scene.ObjectList.Add(Obj);
+		scene.AddObject(Obj);
 
 		var o1 = new PhysicalObject(new Vec2(10, 20));
 		var anim = new Glc.Component.GraphicalComponent.Animation(Glc.Component.AnimationType.Cyclic);
@@ -48,7 +48,7 @@ class Program {
 		o1.SetGraphicalComponent(anim);
 		o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
 		o1.AddComponent(new Glc.Component.Script(@"C:\Users\Влад\Desktop\jaj.cpp"));
-		scene.ObjectList.Add(o1);
+		scene.AddObject(o1);
 
 		Glance.scenes.Add(scene);
 

@@ -6,7 +6,7 @@ namespace Glc
 {
 	public class Scene
 	{
-		public List<GameObject> ObjectList;
+		internal List<GameObject> ObjectList;
 		private string _className;
 		public string ClassName
 		{
@@ -57,6 +57,11 @@ namespace Glc
 			foreach (var i in ObjectList)
 				result += i.ObjectName + ".onRender()";
 			return result;
+		}
+		public void AddObject(GameObject go)
+		{
+			go.Scn = this;
+			ObjectList.Add(go);
 		}
 	}
 }

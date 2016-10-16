@@ -11,15 +11,17 @@ namespace Glc
 		public PhysicalObject(Vec2 pos, bool isRenderable = true) : base()
 		{
 			IsRenderableAtStart = isRenderable;
+			Scn = null;
 			Pos = pos;
 			ClassName = "PhysicalObject" + _count++;
 			ObjectName = "Obj" + ClassName;
 		}
-		override public void GenerateFile()
+		override public void GenerateCode()
 		{
 			if (_filePath == "" || _filePath == null)
-				throw new Exception("file do not exist, when GenerateFile called");
-			Console.WriteLine("Glance.CodeGenerator.writePhysicalObject" + _filePath);
+				throw new Exception("File do not exist for " + ClassName + ", when GenerateCode called");
+			if (Scn == null)
+				throw new Exception("Object " + ClassName + " haven't Scene, when GenerateCode called");
 			var fs = File.Open(_filePath, FileMode.Append);
 			Glance.CodeGenerator.writePhysicalObject(fs, this);
 			fs.Close();
