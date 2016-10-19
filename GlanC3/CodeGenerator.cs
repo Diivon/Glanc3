@@ -157,7 +157,7 @@ namespace Glc
 			///<summary>Code generate</summary>
 			internal static void GenerateCode()
 			{
-				foreach (var SO in	scenes[0].ObjectList)
+				foreach (var SO in	scenes[0].ObjectList)//objects
 				{
 					if (SO.ImplementationFilePath == null || SO.ImplementationFilePath == "")
 					{
@@ -171,20 +171,19 @@ namespace Glc
 						File.Create(declFileName).Close();
 						SO.DeclarationFilePath = declFileName;
 					}
-					Glance.BuildSetting.complilerTargets.Add(SO.ImplementationFilePath);
 					SO.GenerateCode();
 				}
-				{
+				{//scenes
 					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].ClassName + ".h");
 					writeScene(Scfs, scenes[0]);
 					Scfs.Close();
 				}
-				{
+				{//mainh
 					var mainHfs = File.Create(BuildSetting.sourceDir + "main.h");
 					writeMainH(mainHfs);
 					mainHfs.Close();
 				}
-				{
+				{//maincpp
 					var MainCppfs = File.Create(BuildSetting.sourceDir + "main.cpp");
 					writeMainCpp(MainCppfs);
 					MainCppfs.Close();

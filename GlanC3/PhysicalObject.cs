@@ -23,8 +23,8 @@ namespace Glc
 				throw new Exception("File declaration do not exist for " + ClassName + ", when GenerateCode called");
 			if (Scn == null)
 				throw new Exception("Object " + ClassName + " haven't Scene, when GenerateCode called");
-			var impl = File.Open(_implementationfilePath, FileMode.Append);
-			var decl = File.Open(_declarationfilePath, FileMode.Append);
+			var impl = File.Open(_implementationfilePath, FileMode.Truncate);
+			var decl = File.Open(_declarationfilePath, FileMode.Truncate);
 			Glance.CodeGenerator.writePhysicalObject(decl, impl, this);
 			impl.Close();
 			decl.Close();

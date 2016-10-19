@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Glc
 {
@@ -17,12 +15,26 @@ namespace Glc
 
 		public abstract class Component
 		{
+			/// <summary>return defined in script variables</summary>
+			/// <summary>one variable per index</summary>
+			/// <returns>return variables without semi-colon at the end</returns>
 			internal abstract string GetCppVariables();
-			internal abstract string GetCppMethods();
+			/// <summary>return defined in script methods</summary>
+			/// <summary>one variable per index</summary>
+			/// <returns>return method declaration without semi-colon at the end</returns>
+			internal abstract string GetCppMethodsDeclaration();
+			/// <summary>return constructors for component variables</summary>
+			/// <summary>as Initializaton List(which goes after colon)</summary>
+			/// <returns></returns>
+			
 			internal abstract string GetCppConstructor();
+			/// <summary>return body for constructor</summary>
 			internal abstract string GetCppConstructorBody();
+			/// <summary>return code, that must be in onUpdate()</summary>
 			internal abstract string GetCppOnUpdate();
+			/// <summary>return code, that must be in onUpdate()</summary>
 			internal abstract string GetCppOnRender();
+			/// <summary>return code, that must be in onStart()</summary>
 			internal abstract string GetCppOnStart();
 		}
 		public abstract class GraphicalComponent: Component
@@ -54,7 +66,7 @@ namespace Glc
 				{
 					return Glance.templates["Com:StaticSprite:Vars"];
 				}
-				internal override string GetCppMethods()
+				internal override string GetCppMethodsDeclaration()
 				{
 					return Glance.templates["Com:StaticSprite:Methods"];
 				}
@@ -102,7 +114,7 @@ namespace Glc
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:Vars"]);
 				}
-				internal override string GetCppMethods()
+				internal override string GetCppMethodsDeclaration()
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:Methods"]);
 				}
@@ -140,7 +152,7 @@ namespace Glc
 			}
 			public class Animator
 			{
-				//:)
+				//TODO : class Animator
 			}
 		}
 		public class Script: Component
@@ -160,6 +172,7 @@ namespace Glc
 			}
 			internal override string GetCppVariables()
 			{
+				//TODO: variables parsing
 				return "";
 			}
 			internal override string GetCppConstructor()
@@ -167,10 +180,6 @@ namespace Glc
 				return "";
 			}
 			internal override string GetCppConstructorBody()
-			{
-				return "";
-			}
-			internal override string GetCppMethods()
 			{
 				return "";
 			}
@@ -186,6 +195,11 @@ namespace Glc
 			{
 				return _GetMethodBody("void onStart()");
 			}
+			internal override string GetCppMethodsDeclaration()
+			{
+				return "";
+			}
+
 			///<summary>if script is invalid throw exception. that will explain problem</summary>
 			/// <summary>Create script, linked to a file</summary>
 			///<summary>do not return signature </summary>

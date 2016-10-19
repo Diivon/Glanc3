@@ -19,18 +19,7 @@ namespace Glc
 			}
 			get { return _className; }
 		}
-		public string ObjectName
-		{
-			set
-			{
-				if (Regex.IsMatch(value, @"^[a-zA-Z0-9_]+$"))
-					_objectName = value;
-				else throw new ArgumentException("Name must contain only letters, numbers and cymbol '_'");
-			}
-			get { return _objectName; }
-		}
 		/// <summary>Scene, where this object is</summary>
-		public Scene Scn;
 
 		/// <summary>Components of this object</summary>
 		public List<Component.Component> Components;
@@ -59,6 +48,17 @@ namespace Glc
 			}
 		}
 
+		internal string ObjectName
+		{
+			set
+			{
+				if (Regex.IsMatch(value, @"^[a-zA-Z0-9_]+$"))
+					_objectName = value;
+				else throw new ArgumentException("Name must contain only letters, numbers and cymbol '_'");
+			}
+			get { return _objectName; }
+		}
+		internal Scene Scn;
 		protected string _objectName;
 		protected string _className;
 		protected string _implementationfilePath;
@@ -81,8 +81,6 @@ namespace Glc
 			string result = "";
 			foreach (var com in Components)
 			{
-				if (com.GetCppVariables() == "")
-					continue;
 				result += com.GetCppVariables() +'\n';
 			}
 			return result + GraphComponent.GetCppVariables() + '\n';
@@ -95,11 +93,9 @@ namespace Glc
 			string result = "";
 			foreach (var com in Components)
 			{
-				if (com.GetCppMethods() == "")
-					continue;
-				result += com.GetCppMethods() + '\n';
+				result += com.GetCppMethodsDeclaration() + '\n';
 			}
-			return result + GraphComponent.GetCppMethods() + '\n';
+			return result + GraphComponent.GetCppMethodsDeclaration() + '\n';
 		}
 		/// <summary>return all components necessary Constructors</summary>
 		internal string GetComponentsConstructors()

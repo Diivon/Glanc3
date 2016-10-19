@@ -111,6 +111,8 @@ namespace Glc
 
 			if (BuildSetting.isCompile)
 			{
+				foreach (var i in scenes[0].ObjectList)
+					BuildSetting.complilerTargets.Add(Glance.BuildSetting.sourceDir + i.ClassName + ".cpp");
 				Process cmd = new Process();
 				cmd.StartInfo = new ProcessStartInfo(@"cmd.exe");
 				cmd.StartInfo.RedirectStandardInput = true;
@@ -168,12 +170,16 @@ namespace Glc
 			dict.Remove("");//for guarantee
 		}
 		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
-		internal static string GatherStringList(System.Collections.Generic.List<string> list, char connector)
+		internal static string GatherStringList(System.Collections.Generic.List<string> list, string connector)
 		{
 			string result = "";
 			foreach (string str in list)
 				result += str + connector;
 			return result;
+		}
+		internal static string GatherStringList(System.Collections.Generic.List<string> list, char connector)
+		{
+			return GatherStringList(list, connector.ToString());
 		}
 		///<summary>kaef</summary>
 		internal static string ToCppString(string s)
