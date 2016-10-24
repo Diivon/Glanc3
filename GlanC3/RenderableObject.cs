@@ -1,38 +1,21 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 
 namespace Glc
 {
-	public class PhysicalObject : GameObject
+	class RenderableObject : PhysicalObject
 	{
-		public Vec2 Pos;
-		public PhysicalObject(Vec2 pos) : base()
+		/// <summary>Graphical components of this object</summary>
+		public Component.GraphicalComponent GraphComponent;
+		public RenderableObject(Vec2 p) : base(p)
 		{
-			Scn = null;
-			Pos = pos;
-			ClassName = "PhysicalObject" + _count++;
-			ObjectName = "Obj" + ClassName;
+			GraphComponent = null;
 		}
-		static PhysicalObject() { _count = 0; }
 
-		override internal void GenerateCode()
-		{
-			if (_implementationfilePath == "" || _implementationfilePath == null)
-				throw new Exception("File implementation do not exist for " + ClassName + ", when GenerateCode called");
-			if (_declarationfilePath == "" || _declarationfilePath == null)
-				throw new Exception("File declaration do not exist for " + ClassName + ", when GenerateCode called");
-			if (Scn == null)
-				throw new Exception("Object " + ClassName + " haven't Scene, when GenerateCode called");
-			var impl = File.Open(_implementationfilePath, FileMode.Truncate);
-			var decl = File.Open(_declarationfilePath, FileMode.Truncate);
-			Glance.CodeGenerator.writePhysicalObject(decl, impl, this);
-			impl.Close();
-			decl.Close();
-		}
-		private static uint _count;
 		internal override string GetComponentsVariables()
 		{
+			if (GraphComponent == null)
+				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			foreach (var com in Components)
 			{
@@ -44,6 +27,8 @@ namespace Glc
 		}
 		internal override string GetComponentsMethodsDeclaration()
 		{
+			if (GraphComponent == null)
+				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			foreach (var com in Components)
 			{
@@ -55,6 +40,8 @@ namespace Glc
 		}
 		internal override string GetComponentsMethodsImplementation()
 		{
+			if (GraphComponent == null)
+				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			foreach (var com in Components)
 			{
@@ -66,6 +53,8 @@ namespace Glc
 		}
 		internal override string GetComponentsConstructors()
 		{
+			if (GraphComponent == null)
+				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			foreach (var com in Components)
 			{
@@ -77,6 +66,8 @@ namespace Glc
 		}
 		internal override string GetComponentsConstructorsBody()
 		{
+			if (GraphComponent == null)
+				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			foreach (var com in Components)
 			{
@@ -90,6 +81,8 @@ namespace Glc
 		}
 		internal override string GetComponentsOnRender()
 		{
+			if (GraphComponent == null)
+				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			foreach (var com in Components)
 			{
@@ -103,6 +96,8 @@ namespace Glc
 		}
 		internal override string GetComponentsOnUpdate()
 		{
+			if (GraphComponent == null)
+				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			foreach (var com in Components)
 			{
@@ -116,6 +111,8 @@ namespace Glc
 		}
 		internal override string GetComponentsOnStart()
 		{
+			if (GraphComponent == null)
+				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			foreach (var com in Components)
 			{

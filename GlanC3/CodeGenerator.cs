@@ -88,7 +88,7 @@ namespace Glc
 				foreach (var Scn in scenes)
 					WriteLnIn(fs, "#include \"" + Scn.ClassName + ".h\"");
 			}
-			///<summary>write SpriteObject template from settings.gcs -> fs</summary>
+			///<summary>write header, and implementation of this object</summary>
 			internal static void writePhysicalObject(FileStream declaration, FileStream implementation, PhysicalObject PO)
 			{
 
@@ -98,7 +98,7 @@ namespace Glc
 									.Replace("#Pos#" , PO.Pos.ToCppCtor())
 									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
-									.Replace("#ComponentsMethods#", PO.GetComponentsMethods())
+									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsDeclaration())
 									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
 									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
@@ -110,12 +110,22 @@ namespace Glc
 									.Replace("#Pos#", PO.Pos.ToCppCtor())
 									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
-									.Replace("#ComponentsMethods#", PO.GetComponentsMethods())
+									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsImplementation())
 									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
 									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO.Scn.ClassName)
+							);
+			}
+			internal static void writeRenderableObject(FileStream declaration, FileStream implementation, PhysicalObject PO)
+			{
+				writeStdInc(declaration);
+				WriteLnIn(declaration, templates["Class:RenderableObject:Declaration"]
+									.Replace(' ', ' ')
+							);
+				WriteLnIn(implementation, templates["Class:RenderableObject:Implementation"]
+									.Replace(' ', ' ')
 							);
 			}
 			internal static void writeScene(FileStream fs, Scene S)
@@ -138,7 +148,8 @@ namespace Glc
 
 				string render = "";
 				foreach (var i in S.ObjectList)
-					render += "cam.render(" + i.ObjectName + ".onRender(cam));";//renders
+					if(i is RenderableObject)
+						render += "cam.render(" + i.ObjectName + ".onRender(cam));";//renders
 
 				string getObjects = "";
 				foreach (var i in S.ObjectList)

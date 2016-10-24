@@ -50,6 +50,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="RenderableObject.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="SpriteFrame.cs" />
     <Compile Include="PhysicalObject.cs" />

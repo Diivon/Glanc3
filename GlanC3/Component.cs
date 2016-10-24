@@ -15,18 +15,18 @@ namespace Glc
 
 		public abstract class Component
 		{
-			/// <summary>return defined in script variables</summary>
-			/// <summary>one variable per index</summary>
+			/// <summary>return defined in script variables
+			/// one variable per index</summary>
 			/// <returns>return variables without semi-colon at the end</returns>
 			internal abstract string GetCppVariables();
-			/// <summary>return defined in script methods</summary>
-			/// <summary>one variable per index</summary>
+			/// <summary>return defined in component methods</summary>
 			/// <returns>return method declaration without semi-colon at the end</returns>
-			internal abstract string GetCppMethodsDeclaration();
-			/// <summary>return constructors for component variables</summary>
-			/// <summary>as Initializaton List(which goes after colon)</summary>
-			/// <returns></returns>
-			
+			internal abstract string[] GetCppMethodsDeclaration();
+			/// <summary>(declaration, implementation)</summary>
+			internal abstract Dictionary<string, string> GetCppMethodsImplementation();
+
+			/// <summary>return constructors for component variables
+			/// as Initializaton List(which goes after colon)</summary>
 			internal abstract string GetCppConstructor();
 			/// <summary>return body for constructor</summary>
 			internal abstract string GetCppConstructorBody();
@@ -66,9 +66,13 @@ namespace Glc
 				{
 					return Glance.templates["Com:StaticSprite:Vars"];
 				}
-				internal override string GetCppMethodsDeclaration()
+				internal override string[] GetCppMethodsDeclaration()
 				{
-					return Glance.templates["Com:StaticSprite:Methods"];
+					return Glance.templates["Com:StaticSprite:Methods"].Split(';');
+				}
+				internal override Dictionary<string, string> GetCppMethodsImplementation()
+				{
+					return new Dictionary<string, string>();
 				}
 				internal override string GetCppConstructor()
 				{
@@ -114,9 +118,13 @@ namespace Glc
 				{
 					return _GetProcessed(Glance.templates["Com:Animation:Vars"]);
 				}
-				internal override string GetCppMethodsDeclaration()
+				internal override string[] GetCppMethodsDeclaration()
 				{
-					return _GetProcessed(Glance.templates["Com:Animation:Methods"]);
+					return _GetProcessed(Glance.templates["Com:Animation:Methods"]).Split(';');
+				}
+				internal override Dictionary<string, string> GetCppMethodsImplementation()
+				{
+					return new Dictionary<string, string>();
 				}
 				internal override string GetCppConstructor()
 				{
@@ -195,14 +203,14 @@ namespace Glc
 			{
 				return _GetMethodBody("void onStart()");
 			}
-			internal override string GetCppMethodsDeclaration()
+			internal override string[] GetCppMethodsDeclaration()
 			{
-				return "";
+				return new string[]{ "" };
 			}
-
-			///<summary>if script is invalid throw exception. that will explain problem</summary>
-			/// <summary>Create script, linked to a file</summary>
-			///<summary>do not return signature </summary>
+			internal override Dictionary<string, string> GetCppMethodsImplementation()
+			{
+				return new Dictionary<string, string>();
+			}
 			private string _GetMethodBody(string sign)
 			{
 				//ochen pizdec, sorry

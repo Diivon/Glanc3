@@ -51,13 +51,6 @@ namespace Glc
 				result += i.ObjectName + ".onUpdate(dt);\n";
 			return result;
 		}
-		internal string GetAllObjectsOnRender()
-		{
-			string result = "";
-			foreach (var i in ObjectList)
-				result += i.ObjectName + ".onRender()";
-			return result;
-		}
 		public void AddObject(GameObject go)
 		{
 			go.Scn = this;
