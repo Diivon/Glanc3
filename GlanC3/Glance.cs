@@ -177,14 +177,39 @@ namespace Glc
 				result += str + connector;
 			return result;
 		}
+		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
 		internal static string GatherStringList(System.Collections.Generic.List<string> list, char connector)
 		{
 			return GatherStringList(list, connector.ToString());
 		}
-		///<summary>kaef</summary>
 		internal static string ToCppString(string s)
 		{
 			return '"' + s.Replace(@"\", @"\\") + '"';
+		}
+		internal static void MergeDictionary(ref Dictionary<string, string> left, Dictionary<string, string> right)
+		{
+			foreach (KeyValuePair<string, string> i in right)
+			{
+				if (left.ContainsKey(i.Key))
+					left[i.Key] += i.Value;
+				else
+					left.Add(i.Key, i.Value);
+			}
+		}
+
+		internal static string GetRetTypeFromSignature(string signature)
+		{
+			//TODO: parse decltype() too
+			int pos = signature.LastIndexOf('(');
+			pos = signature.Substring(0, pos - 1).LastIndexOf(' ');
+			return signature.Substring(0, pos);
+		}
+		internal static string GetSignatureWithoutRetType(string signature)
+		{
+			//TODO: parse decltype() too
+			int pos = signature.LastIndexOf('(');
+			pos = signature.Substring(0, pos - 1).LastIndexOf(' ');
+			return signature.Substring(pos).Trim();
 		}
 		static Glance()
 		{

@@ -32,7 +32,7 @@ namespace Glc
 			internal abstract string GetCppConstructorBody();
 			/// <summary>return code, that must be in onUpdate()</summary>
 			internal abstract string GetCppOnUpdate();
-			/// <summary>return code, that must be in onUpdate()</summary>
+			/// <summary>return code, that must be in onRender()</summary>
 			internal abstract string GetCppOnRender();
 			/// <summary>return code, that must be in onStart()</summary>
 			internal abstract string GetCppOnStart();
@@ -205,61 +205,18 @@ namespace Glc
 			}
 			internal override string[] GetCppMethodsDeclaration()
 			{
-				return new string[]{ "" };
+				return new string[]{ "void On()", "void Off()" };
 			}
 			internal override Dictionary<string, string> GetCppMethodsImplementation()
 			{
-				return new Dictionary<string, string>();
+				Dictionary<string, string> dict = new Dictionary<string, string>();
+				dict.Add("void On()", "std::cout << \"On()\" << std::endl;");
+				dict.Add("void Off()", "std::cout << \"Off()\" << std::endl;");
+				return dict;
 			}
 			private string _GetMethodBody(string sign)
 			{
-				//ochen pizdec, sorry
-				///cymbols to trim:)
-				char[] cymbolsToTrim = { ' ', '\t' };
-				///all strings from script file
-				string[] Data = System.IO.File.ReadAllLines(file);
-				///tabs count on moment, when searched method was found
-				byte methodTabs = 0;
-				///current tabs count
-				byte fileTabs = 0;
-				///...
-				string result = "";
-				///if we currently inside searched method body
-				bool isInsideMethod = false;
-
-				foreach (var i in Data)
-				{
-					var str = i.Trim(cymbolsToTrim);//ready string for processing
-					if (str == "" || str == null) continue;//if nothing, skip
-
-					if (str.Contains('{'))
-						++fileTabs;
-					if (str.Contains('}'))
-						--fileTabs;
-
-					if (str == sign)
-					{
-						isInsideMethod = true;
-						methodTabs = fileTabs;
-						continue;
-					}
-					if(str == (sign + '{'))
-					{
-						isInsideMethod = true;
-						methodTabs = (byte)(fileTabs - 1);
-						continue;
-					}
-					if (isInsideMethod)
-					{
-						if (fileTabs == methodTabs)//if we at the end of method
-						{
-							isInsideMethod = false;
-						}
-						else
-							result += str;
-					}
-				}
-				return result;
+				//TODO: DO
 			}
 		}
 	}

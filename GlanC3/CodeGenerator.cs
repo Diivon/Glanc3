@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace Glc
@@ -13,55 +12,46 @@ namespace Glc
 		{
 			///<summary>FileStream for Write/WriteLn</summary>
 			internal static FileStream FStream;
-			///
-			internal static byte TabCount;
-			///<summary>write data + '\n' -> CodeGenerator.FStream considering TabCount</summary>
-			internal static void WriteLn(string data)
+			/// <summary>return number > 0 if block is started, and count of started blocks</summary>
+			private static int _GetBlockChange(string a)
 			{
-				if (data == null)
-					return;
-				if (data[data.Length - 1] == '{') ++TabCount;
-				if (data[0] == '}') --TabCount;
-				string tabs = "";
-				for (byte i = 0; i < TabCount; ++i)
-					tabs += '\t';
-				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs) + '\n');
-				FStream.Write(kek, 0, kek.Length);
-			}
-			///<summary>write data -> CodeGenerator.FStream considering TabCount</summary>
-			internal static void Write(string data)
-			{
-				string tabs = "";
-				for (byte i = 0; i < TabCount; ++i)
-					tabs += '\t';
-				byte[] kek = Encoding.Unicode.GetBytes(tabs + data.Replace("\n", '\n' + tabs));
-				FStream.Write(kek, 0, kek.Length);
+				short openBraces = 0;//count of '{'
+				foreach (char i in a) if (i == '{') ++openBraces;
+				short closeBraces = 0;//count of '}'
+				foreach (char i in a) if (i == '}') ++closeBraces;
+				return openBraces - closeBraces;
 			}
 			///<summary>write data + '\n' -> fs considering TabCount</summary>
 			internal static void WriteLnIn(FileStream fs, string data)
 			{
 				if (data == null)
-					return;
-				string[] strings = data.Split('\n');
-				byte tabcount = 0;
-				foreach(var str in strings)
+					throw new ArgumentNullException();
+				char[] charsToTrim = { '\t', ' ' };
+				string[] strings = data.Split('\n');	//return lines
+				int tabcount = 0;						//code block level(if they are inside '{', '}')
+				foreach(var str in strings)				//for every line in data
 				{
-					if (str.Contains('{'))
-						++tabcount;
-					if (str.Contains('}'))
-						--tabcount;
-					string finalstr = "";
-					for (byte i = 0; i < tabcount; ++i)
-						finalstr += '\t';
-					finalstr += str.Trim(new char[] { '\t', ' '});
-					byte[] finalBytes = Encoding.Unicode.GetBytes(finalstr + '\n');
+					if (String.IsNullOrWhiteSpace(str))	//if white space
+						continue;
+					if (str.Contains('}'))              //if block is ended P.S. it make bugs if '{' and '}' at the same line
+						if(!str.Contains('{'))
+							--tabcount;
+
+					string finalstr = "";				//string, that will be writed in file
+					for (byte i = 0; i < tabcount; ++i)	//add tabs 
+						finalstr += '\t';               //for better reading
+					finalstr += str.Trim();				//without trash
+					byte[] finalBytes = Encoding.Unicode.GetBytes(finalstr + '\n');//line as bytes to write in file
 					fs.Write(finalBytes, 0, finalBytes.Length);
+
+					if (str.Contains('{'))              //if block is started P.S. it make bugs if '{' and '}' at the same line
+						++tabcount;
 				}
 			}
 			///<summary>write data -> fs considering TabCount</summary>
 			internal static void WriteIn(FileStream fs, string data)
 			{
-				byte[] kek = Encoding.Unicode.GetBytes(data);
+				byte[] kek = Encoding.Unicode.GetBytes(data.Trim());
 				fs.Write(kek, 0, kek.Length);
 			}
 			///<summary>write "StandartIncludes" from settings.gcs -> fs</summary>
@@ -204,7 +194,6 @@ namespace Glc
 			static CodeGenerator()
 			{
 				FStream = null;
-				TabCount = 0;
 			}
 		}
 	}

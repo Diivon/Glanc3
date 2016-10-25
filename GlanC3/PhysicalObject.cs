@@ -47,7 +47,7 @@ namespace Glc
 			string result = "";
 			foreach (var com in Components)
 			{
-				result += Glance.GatherStringList(new List<string>(com.GetCppMethodsDeclaration()), ';') + '\n';
+				result += Glance.GatherStringList(new List<string>(com.GetCppMethodsDeclaration()), ";\n") + '\n';
 			}
 			if (result != "")//if no methods, no need for '\n'
 				result += '\n';
@@ -56,12 +56,18 @@ namespace Glc
 		internal override string GetComponentsMethodsImplementation()
 		{
 			string result = "";
-			foreach (var com in Components)
-			{
-				if (com.GetCppConstructor() == "")
-					continue;
-				result += ", " + com.GetCppConstructor();
-			}
+			var functions = new Dictionary<string, string>();
+			foreach (var i in Components)
+				Glance.MergeDictionary(ref functions, i.GetCppMethodsImplementation());
+			/*
+			foreach (var i in functions)
+				Console.WriteLine("~~~~~~~~!" + i.Key + '!' + i.Value + '!');
+			*/
+			foreach (var i in functions)
+				result += Glance.GetRetTypeFromSignature(i.Key) + ' ' + ClassName + "::" + Glance.GetSignatureWithoutRetType(i.Key) + '{' + i.Value + '}' + '\n';
+			Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			Console.WriteLine(result);
+			Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 			return result;
 		}
 		internal override string GetComponentsConstructors()
