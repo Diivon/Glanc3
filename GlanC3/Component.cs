@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 
 namespace Glc
 {
@@ -18,7 +18,7 @@ namespace Glc
 			/// <summary>return defined in script variables
 			/// one variable per index</summary>
 			/// <returns>return variables without semi-colon at the end</returns>
-			internal abstract string GetCppVariables();
+			internal abstract string[] GetCppVariables();
 			/// <summary>return defined in component methods</summary>
 			/// <returns>return method declaration without semi-colon at the end</returns>
 			internal abstract string[] GetCppMethodsDeclaration();
@@ -62,9 +62,9 @@ namespace Glc
 				{
 					FileName = fn;
 				}
-				internal override string GetCppVariables()
+				internal override string[] GetCppVariables()
 				{
-					return Glance.templates["Com:StaticSprite:Vars"];
+					return Glance.templates["Com:StaticSprite:Vars"].Split(';');
 				}
 				internal override string[] GetCppMethodsDeclaration()
 				{
@@ -114,9 +114,9 @@ namespace Glc
 				{
 					Frames.Add(new SpriteFrame(path, dur));
 				}
-				internal override string GetCppVariables()
+				internal override string[] GetCppVariables()
 				{
-					return _GetProcessed(Glance.templates["Com:Animation:Vars"]);
+					return _GetProcessed(Glance.templates["Com:Animation:Vars"]).Split(';');
 				}
 				internal override string[] GetCppMethodsDeclaration()
 				{
@@ -174,14 +174,22 @@ namespace Glc
 				if (onUpdateCode.Contains(Glance.NameSetting.AnimatorName + ".update"))
 					throw new Exception("Animator updated in script");
 			}
+			public void CreateFile(string path)
+			{
+				var fs = System.IO.File.Create(path);
+				string str = Glance.templates["B:Script"];
+				byte[] arr = System.Text.Encoding.Unicode.GetBytes(str);
+				fs.Write(arr, 0, arr.Length);
+				fs.Close();
+			}
 			public Script(string filepath)
 			{
 				file = filepath;
+				_data = new _Data(this);
 			}
-			internal override string GetCppVariables()
+			internal override string[] GetCppVariables()
 			{
-				//TODO: variables parsing
-				return "";
+				return _data.Variables;
 			}
 			internal override string GetCppConstructor()
 			{
@@ -193,31 +201,141 @@ namespace Glc
 			}
 			internal override string GetCppOnUpdate()
 			{
-				return _GetMethodBody("void onUpdate(const float & dt)"); 
+				return _data.onUpdate; 
 			}
 			internal override string GetCppOnRender()
 			{
-				return _GetMethodBody("const sf::Sprite & onRender(::gc::Camera & cam)"); 
+				return ""; 
 			}
 			internal override string GetCppOnStart()
 			{
-				return _GetMethodBody("void onStart()");
+				return _data.onStart;
 			}
 			internal override string[] GetCppMethodsDeclaration()
 			{
-				return new string[]{ "void On()", "void Off()" };
+				return _data.MethodsDeclarations;
 			}
 			internal override Dictionary<string, string> GetCppMethodsImplementation()
 			{
-				Dictionary<string, string> dict = new Dictionary<string, string>();
-				dict.Add("void On()", "std::cout << \"On()\" << std::endl;");
-				dict.Add("void Off()", "std::cout << \"Off()\" << std::endl;");
-				return dict;
+				return _data.MethodsImplementations;
 			}
-			private string _GetMethodBody(string sign)
+			private _Data _data;
+
+			private class _Data
 			{
-				//TODO: DO
-			}
-		}
-	}
-}
+				public _Data(Script s)
+				{
+					_isInitializated = false;
+					_owner = s;
+					MethodsImplementations = new Dictionary<string, string>();
+					MethodsImplementations.Add(Glance.NameSetting.ScriptOnStartSignature, "");//costili
+					MethodsImplementations.Add(Glance.NameSetting.ScriptOnUpdateSignature, "");//KOCTblJlU
+				}
+				public string[] Variables
+				{
+					get
+					{
+						_Init();
+						return _variables;
+					}
+					private set
+					{
+						_variables = value;
+					}
+				}
+				public string onUpdate { get;	private set; }
+				public string onStart { get; private set; }
+				public string[] MethodsDeclarations { get; private set; }
+				public Dictionary<string, string> MethodsImplementations { get; private set; }
+
+				private string[] _variables;
+
+				private Script _owner;
+				private bool _isInitializated;
+				private void _Init()
+				{
+					if (_isInitializated)
+						return;
+					//
+					var strings = File.ReadAllLines(_owner.file);
+					bool isInsideVariablesRegion = false;
+					bool isInsideMethodsRegion = false;
+					bool isInsideMethod = false;
+					byte tabs = 0; ;
+					List<string> variables = new List<string>();
+					string currentMethodSignature = null;
+
+					foreach (var i in strings)
+					{
+						var str = i.Trim();
+						if (str == "")
+							continue;
+						if(str.Length > 2)
+							if (str.Substring(0, 2) == "//")
+								continue;
+						if (str.Contains(Glance.NameSetting.ScriptVariablesRegionName))
+						{
+							isInsideVariablesRegion = true;
+							isInsideMethodsRegion = false;
+							continue;
+						}
+						if (str.Contains(Glance.NameSetting.ScriptMethodsRegionName))
+						{
+							isInsideMethodsRegion = true;
+							isInsideVariablesRegion = false;
+							continue;//any else words in this line are illegal, if you find some in it, please call 911
+						}
+
+						if (isInsideVariablesRegion)
+							variables.Add(str);
+
+						if (isInsideMethodsRegion)
+						{
+							if(!isInsideMethod)//method after method, without any shit
+							{
+								currentMethodSignature = str.Substring(0, str.Length - 1);//cut '{'
+								isInsideMethod = true;
+								++tabs;
+								continue;
+							}
+							if (isInsideMethod)
+							{
+								if (str.Contains("{"))
+									++tabs;
+								if (str.Contains("}"))
+									--tabs;
+								if (tabs == 0)
+								{
+									isInsideMethod = false;
+									continue;
+								}
+								if (MethodsImplementations.ContainsKey(currentMethodSignature))
+								{
+									MethodsImplementations[currentMethodSignature] += str;
+								}
+								else
+									MethodsImplementations.Add(currentMethodSignature, str);
+							}
+						}
+					}//foreach
+
+					Variables = variables.ToArray();
+					onUpdate = MethodsImplementations[Glance.NameSetting.ScriptOnUpdateSignature];
+					onStart = MethodsImplementations[Glance.NameSetting.ScriptOnStartSignature];
+
+					MethodsImplementations.Remove(Glance.NameSetting.ScriptOnStartSignature);
+					MethodsImplementations.Remove(Glance.NameSetting.ScriptOnUpdateSignature);
+					if (MethodsImplementations.ContainsKey(""))
+						MethodsImplementations.Remove("");
+
+					List<string> temp = new List<string>();
+					foreach (var i in MethodsImplementations)
+						temp.Add(i.Key);
+					MethodsDeclarations = temp.ToArray();
+
+					_isInitializated = true;
+				}//_Init()
+			}//_Data
+		}//class Script
+	}//ns Component
+}//ns Glc

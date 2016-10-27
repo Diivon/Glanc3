@@ -16,6 +16,7 @@ namespace Glc
 		}
 		static PhysicalObject() { _count = 0; }
 
+		private static uint _count;
 		override internal void GenerateCode()
 		{
 			if (_implementationfilePath == "" || _implementationfilePath == null)
@@ -30,13 +31,12 @@ namespace Glc
 			impl.Close();
 			decl.Close();
 		}
-		private static uint _count;
 		internal override string GetComponentsVariables()
 		{
 			string result = "";
 			foreach (var com in Components)
 			{
-				result += com.GetCppVariables() + '\n';
+				result += Glance.GatherStringList(com.GetCppVariables(), '\n');
 			}
 			if (result != "")//if no variables, no need for '\n'
 				result += '\n';
@@ -47,7 +47,8 @@ namespace Glc
 			string result = "";
 			foreach (var com in Components)
 			{
-				result += Glance.GatherStringList(new List<string>(com.GetCppMethodsDeclaration()), ";\n") + '\n';
+				result += Glance.GatherStringList(com.GetCppMethodsDeclaration(), ";\n");
+				Console.WriteLine(Glance.GatherStringList(com.GetCppMethodsDeclaration(), ";\n"));
 			}
 			if (result != "")//if no methods, no need for '\n'
 				result += '\n';
@@ -59,15 +60,8 @@ namespace Glc
 			var functions = new Dictionary<string, string>();
 			foreach (var i in Components)
 				Glance.MergeDictionary(ref functions, i.GetCppMethodsImplementation());
-			/*
-			foreach (var i in functions)
-				Console.WriteLine("~~~~~~~~!" + i.Key + '!' + i.Value + '!');
-			*/
 			foreach (var i in functions)
 				result += Glance.GetRetTypeFromSignature(i.Key) + ' ' + ClassName + "::" + Glance.GetSignatureWithoutRetType(i.Key) + '{' + i.Value + '}' + '\n';
-			Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			Console.WriteLine(result);
-			Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 			return result;
 		}
 		internal override string GetComponentsConstructors()

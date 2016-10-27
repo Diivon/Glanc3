@@ -54,7 +54,7 @@ namespace Glc
 				complilerTargets = new List<string>();
 			}
 		}
-		public static class NameSetting
+		internal static class NameSetting
 		{
 			public static string SpriteName;
 			public static string SpriteType;
@@ -65,6 +65,11 @@ namespace Glc
 			public static string AnimatorName;
 			public static string AnimatorType;
 
+			public static string ScriptVariablesRegionName;
+			public static string ScriptMethodsRegionName;
+
+			public static string ScriptOnUpdateSignature;
+			public static string ScriptOnStartSignature;
 			static NameSetting()
 			{
 				SpriteName = "sprite";
@@ -73,6 +78,10 @@ namespace Glc
 				AnimationType = "animation_t";
 				AnimatorName = "animator";
 				AnimatorType = "animator_t";
+				ScriptVariablesRegionName = "variables:";
+				ScriptMethodsRegionName = "methods:";
+				ScriptOnUpdateSignature = "void onUpdate(const float & dt)";
+				ScriptOnStartSignature = "void onStart()";
 			}
 		}
 		/// <summary>Contain all scene of the game</summary>
@@ -136,7 +145,7 @@ namespace Glc
 		///<summary>else settings for building</summary>
 		internal static Dictionary<string, string> settings;
 
-		///<summary>Buid application by rules</summary>
+		///<summary>Build application by rules</summary>
 		///<summary>return string, which call compiler correctly</summary>
 		internal static string CreateApplication()
         {
@@ -182,6 +191,20 @@ namespace Glc
 		{
 			return GatherStringList(list, connector.ToString());
 		}
+		internal static string GatherStringList(string[] list, char connector)
+		{
+			string result = "";
+			foreach (var i in list)
+				result += i + connector;
+			return result;
+		}
+		internal static string GatherStringList(string[] list, string connector)
+		{
+			string result = "";
+			foreach (var i in list)
+				result += i + connector;
+			return result;
+		}
 		internal static string ToCppString(string s)
 		{
 			return '"' + s.Replace(@"\", @"\\") + '"';
@@ -199,7 +222,6 @@ namespace Glc
 
 		internal static string GetRetTypeFromSignature(string signature)
 		{
-			//TODO: parse decltype() too
 			int pos = signature.LastIndexOf('(');
 			pos = signature.Substring(0, pos - 1).LastIndexOf(' ');
 			return signature.Substring(0, pos);
@@ -211,11 +233,15 @@ namespace Glc
 			pos = signature.Substring(0, pos - 1).LastIndexOf(' ');
 			return signature.Substring(pos).Trim();
 		}
+		internal static void GetInfoAboutFunction(string method, ref string retType, ref string anotherInfo)
+		{
+			retType = GetRetTypeFromSignature(method);
+			anotherInfo = GetSignatureWithoutRetType(method);
+		}
 		static Glance()
 		{
 			templates = new Dictionary<string, string>();
 			settings = new Dictionary<string, string>();
-
 			scenes = new List<Scene>();
 		}
 	}//class Glance

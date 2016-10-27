@@ -19,7 +19,7 @@ namespace Glc
 			string result = "";
 			foreach (var com in Components)
 			{
-				result += com.GetCppVariables() + '\n';
+				result += Glance.GatherStringList(com.GetCppVariables(), '\n');
 			}
 			if (result != "")//if no variables, no need for '\n'
 				result += '\n';

@@ -12,15 +12,6 @@ namespace Glc
 		{
 			///<summary>FileStream for Write/WriteLn</summary>
 			internal static FileStream FStream;
-			/// <summary>return number > 0 if block is started, and count of started blocks</summary>
-			private static int _GetBlockChange(string a)
-			{
-				short openBraces = 0;//count of '{'
-				foreach (char i in a) if (i == '{') ++openBraces;
-				short closeBraces = 0;//count of '}'
-				foreach (char i in a) if (i == '}') ++closeBraces;
-				return openBraces - closeBraces;
-			}
 			///<summary>write data + '\n' -> fs considering TabCount</summary>
 			internal static void WriteLnIn(FileStream fs, string data)
 			{
@@ -47,12 +38,6 @@ namespace Glc
 					if (str.Contains('{'))              //if block is started P.S. it make bugs if '{' and '}' at the same line
 						++tabcount;
 				}
-			}
-			///<summary>write data -> fs considering TabCount</summary>
-			internal static void WriteIn(FileStream fs, string data)
-			{
-				byte[] kek = Encoding.Unicode.GetBytes(data.Trim());
-				fs.Write(kek, 0, kek.Length);
 			}
 			///<summary>write "StandartIncludes" from settings.gcs -> fs</summary>
 			internal static void writeStdInc(FileStream fs)
