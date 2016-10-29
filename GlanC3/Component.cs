@@ -296,6 +296,10 @@ namespace Glc
 								currentMethodSignature = str.Substring(0, str.Length - 1);//cut '{'
 								isInsideMethod = true;
 								++tabs;
+								if (MethodsImplementations.ContainsKey(currentMethodSignature))
+									MethodsImplementations[currentMethodSignature] += "";
+								else
+									MethodsImplementations.Add(currentMethodSignature, "");
 								continue;
 							}
 							if (isInsideMethod)
@@ -310,14 +314,15 @@ namespace Glc
 									continue;
 								}
 								if (MethodsImplementations.ContainsKey(currentMethodSignature))
-								{
-									MethodsImplementations[currentMethodSignature] += str;
-								}
+									MethodsImplementations[currentMethodSignature] += str + '\n';
 								else
-									MethodsImplementations.Add(currentMethodSignature, str);
+									MethodsImplementations.Add(currentMethodSignature, str + '\n');
+								
 							}
 						}
 					}//foreach
+
+					//foreach (var i in MethodsImplementations) Console.WriteLine("Method: " + _owner.file + ' ' + i.Key);
 
 					Variables = variables.ToArray();
 					onUpdate = MethodsImplementations[Glance.NameSetting.ScriptOnUpdateSignature];

@@ -35,7 +35,7 @@ class Program {
 		
 		var scene = new Scene();
 		
-		var Obj = new PhysicalObject(new Vec2(200, 200));
+		var Obj = new PhysicalObject(new Vec2(500, 500));
 		//Obj.GraphComponent = new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg");
 		Obj.Components.Add(new Glc.Component.Script(@"C:\Users\Влад\Desktop\jaj.cpp"));
 		scene.AddObject(Obj);
@@ -43,7 +43,6 @@ class Program {
 		var Obj2 = new PhysicalObject(new Vec2(500,500));
 		//Obj2.GraphComponent = new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\2.jpg");
 		Obj2.Components.Add(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
-		
 		scene.AddObject(Obj2);
 
 		Glance.scenes.Add(scene);
