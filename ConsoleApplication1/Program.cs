@@ -31,19 +31,24 @@ class Program {
 		Glance.BuildSetting.isRunAppAfterCompiling = true;
 		Glance.Init();
 		//-------------Client code starts here
-		
-		
+
+
 		var scene = new Scene();
 		
-		var Obj = new PhysicalObject(new Vec2(500, 500));
-		//Obj.GraphComponent = new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg");
+		var Obj = new RenderableObject(new Vec2(100, 100));
+		var graph = new Glc.Component.GraphicalComponent.Animation(Glc.Component.AnimationType.PingPong);
+		graph.AddFrame(@"resources\n\1.jpg", 500);
+		graph.AddFrame(@"resources\n\2.jpg", 500);
+		graph.AddFrame(@"resources\n\3.jpg", 500);
+		Obj.GraphComponent = graph;
+		Obj.Components.Add(new Glc.Component.Sound(@"resources\kek.wav"));
 		Obj.Components.Add(new Glc.Component.Script(@"C:\Users\Влад\Desktop\jaj.cpp"));
 		scene.AddObject(Obj);
 		
-		var Obj2 = new PhysicalObject(new Vec2(500,500));
+		//var Obj2 = new RenderableObject(new Vec2(500,500));
 		//Obj2.GraphComponent = new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\2.jpg");
-		Obj2.Components.Add(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
-		scene.AddObject(Obj2);
+		//Obj2.Components.Add(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
+		//scene.AddObject(Obj2);
 
 		Glance.scenes.Add(scene);
 		

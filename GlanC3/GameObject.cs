@@ -79,8 +79,6 @@ namespace Glc
 		internal abstract string GetComponentsConstructors();
 		/// <summary>return all components necessary Constructor code</summary>
 		internal abstract string GetComponentsConstructorsBody();
-		/// <summary>return all components necessary OnRender code</summary>
-		internal abstract string GetComponentsOnRender();
 		/// <summary>return all components necessary OnUpdate code</summary>
 		internal abstract string GetComponentsOnUpdate();
 		/// <summary>return all components necessary OnStart code</summary>

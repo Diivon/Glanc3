@@ -32,8 +32,6 @@ namespace Glc
 			internal abstract string GetCppConstructorBody();
 			/// <summary>return code, that must be in onUpdate()</summary>
 			internal abstract string GetCppOnUpdate();
-			/// <summary>return code, that must be in onRender()</summary>
-			internal abstract string GetCppOnRender();
 			/// <summary>return code, that must be in onStart()</summary>
 			internal abstract string GetCppOnStart();
 		}
@@ -53,6 +51,8 @@ namespace Glc
 						return "an error was occured in _AnimationTypeToString()";
 				}
 			}
+			/// <summary>return code, that must be in onRender()</summary>
+			internal abstract string GetCppOnRender();
 			public class StaticSprite : GraphicalComponent
 			{
 				string FileName;
@@ -64,19 +64,32 @@ namespace Glc
 				}
 				internal override string[] GetCppVariables()
 				{
-					return Glance.templates["Com:StaticSprite:Vars"].Split(';');
+					List<string> a = new List<string>();
+					a.AddRange(Glance.templates["Com:StaticSprite:Vars"].Split(';'));
+					string[] result = new string[a.Count];
+					for (int i = 0; i < a.Count; ++i)
+						result[i] = a[i].Trim();
+					return result;
 				}
 				internal override string[] GetCppMethodsDeclaration()
 				{
-					return Glance.templates["Com:StaticSprite:Methods"].Split(';');
+					List<string> a = new List<string>();
+					a.AddRange(Glance.templates["Com:StaticSprite:Methods"].Split(';'));
+					string[] result = new string[a.Count];
+					for (int i = 0; i < a.Count; ++i)
+						result[i] = a[i].Trim();
+					return result;
 				}
 				internal override Dictionary<string, string> GetCppMethodsImplementation()
 				{
-					return new Dictionary<string, string>();
+					var result = new Dictionary<string, string>();
+					foreach (var i in GetCppMethodsDeclaration())
+						result.Add(i, "");
+					return result;
 				}
 				internal override string GetCppConstructor()
 				{
-					return Glance.templates["Com:StaticSprite:Constructor"];
+					return Glance.templates["Com:StaticSprite:Constructor"].Replace("#FileName#", Glance.ToCppString(FileName)).Trim();
 				}
 				internal override string GetCppConstructorBody()
 				{
@@ -116,15 +129,28 @@ namespace Glc
 				}
 				internal override string[] GetCppVariables()
 				{
-					return _GetProcessed(Glance.templates["Com:Animation:Vars"]).Split(';');
+					List<string> a = new List<string>();
+					a.AddRange(_GetProcessed(Glance.templates["Com:Animation:Vars"]).Split(';'));
+					string[] result = new string[a.Count];
+					for (int i = 0; i < a.Count; ++i)
+						result[i] = a[i].Trim();
+					return result;
 				}
 				internal override string[] GetCppMethodsDeclaration()
 				{
-					return _GetProcessed(Glance.templates["Com:Animation:Methods"]).Split(';');
+					List<string> a = new List<string>();
+					a.AddRange(_GetProcessed(Glance.templates["Com:Animation:Methods"]).Split(';'));
+					string[] result = new string[a.Count];
+					for (int i = 0; i < a.Count; ++i)
+						result[i] = a[i].Trim();
+					return result;
 				}
 				internal override Dictionary<string, string> GetCppMethodsImplementation()
 				{
-					return new Dictionary<string, string>();
+					var result = new Dictionary<string, string>();
+					foreach (var i in GetCppMethodsDeclaration())
+						result.Add(i, "");
+					return result;
 				}
 				internal override string GetCppConstructor()
 				{
@@ -155,6 +181,7 @@ namespace Glc
 							.Replace("#AnimationType#", _AnimationTypeToString(_AnimationType))
 							.Replace("#AnimationTypeName#", Glance.NameSetting.AnimationType)
 							.Replace("#AnimationName#", Glance.NameSetting.AnimationName)
+							.Trim()
 							;
 				}
 			}
@@ -202,10 +229,6 @@ namespace Glc
 			internal override string GetCppOnUpdate()
 			{
 				return _data.onUpdate; 
-			}
-			internal override string GetCppOnRender()
-			{
-				return ""; 
 			}
 			internal override string GetCppOnStart()
 			{
@@ -322,8 +345,6 @@ namespace Glc
 						}
 					}//foreach
 
-					//foreach (var i in MethodsImplementations) Console.WriteLine("Method: " + _owner.file + ' ' + i.Key);
-
 					Variables = variables.ToArray();
 					onUpdate = MethodsImplementations[Glance.NameSetting.ScriptOnUpdateSignature];
 					onStart = MethodsImplementations[Glance.NameSetting.ScriptOnStartSignature];
@@ -342,5 +363,41 @@ namespace Glc
 				}//_Init()
 			}//_Data
 		}//class Script
+		public class Sound: Component
+		{
+			public string FileName;
+			public Sound(string filePath)
+			{
+				FileName = filePath;
+			}
+			internal override string[] GetCppVariables()
+			{
+				return Glance.templates["Com:Sound:Vars"].Split(';');
+			}
+			internal override string[] GetCppMethodsDeclaration()
+			{
+				return Glance.templates["Com:Sound:Methods"].Split(';');
+			}
+			internal override Dictionary<string, string> GetCppMethodsImplementation()
+			{
+				return new Dictionary<string, string>();
+			}
+			internal override string GetCppConstructor()
+			{
+				return Glance.templates["Com:Sound:Constructor"].Replace("#FileName#", Glance.ToCppString(FileName));
+			}
+			internal override string GetCppConstructorBody()
+			{
+				return Glance.templates["Com:Sound:ConstructorBody"];
+			}
+			internal override string GetCppOnStart()
+			{
+				return Glance.templates["Com:Sound:OnStart"];
+			}
+			internal override string GetCppOnUpdate()
+			{
+				return Glance.templates["Com:Sound:OnUpdate"];
+			}
+		}//class Sound
 	}//ns Component
 }//ns Glc

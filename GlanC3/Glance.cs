@@ -176,10 +176,11 @@ namespace Glc
 				}
 			}
 			dict.Add(mkey, mvalue);//save last pair
-			dict.Remove("");//for guarantee
+			if (dict.ContainsKey(""))
+				dict.Remove("");
 		}
 		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
-		internal static string GatherStringList(System.Collections.Generic.List<string> list, string connector)
+		internal static string GatherStringList(List<string> list, string connector)
 		{
 			string result = "";
 			foreach (string str in list)
@@ -187,7 +188,7 @@ namespace Glc
 			return result;
 		}
 		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
-		internal static string GatherStringList(System.Collections.Generic.List<string> list, char connector)
+		internal static string GatherStringList(List<string> list, char connector)
 		{
 			return GatherStringList(list, connector.ToString());
 		}
@@ -211,13 +212,23 @@ namespace Glc
 		}
 		internal static void MergeDictionary(ref Dictionary<string, string> left, Dictionary<string, string> right)
 		{
-			foreach (KeyValuePair<string, string> i in right)
+			foreach (var i in right)
 			{
 				if (left.ContainsKey(i.Key))
 					left[i.Key] += i.Value;
 				else
 					left.Add(i.Key, i.Value);
 			}
+		}
+		internal static void PrintDict(Dictionary<string, string> a)
+		{
+			foreach (var i in a)
+				Console.WriteLine("Key:" + i.Key + ":Value:" + i.Value + '~');
+		}
+		internal static void PrintList(List<string> a)
+		{
+			foreach (var i in a)
+				Console.WriteLine("PrintList:" + i);
 		}
 
 		internal static string GetRetTypeFromSignature(string signature)

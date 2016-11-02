@@ -44,7 +44,7 @@ namespace Glc
 			{
 				WriteLnIn(fs, templates["Set:StandartIncludes:Def"]);
 			}
-			///<summary></summary>
+			///<summary> </summary>
 			internal static void writeMainCpp(FileStream fs)
 			{
 				string Sub_include = "#include \"main.h\"";
@@ -75,7 +75,6 @@ namespace Glc
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsDeclaration())
 									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
-									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO.Scn.ClassName)
@@ -87,20 +86,37 @@ namespace Glc
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsImplementation())
 									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
-									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO.Scn.ClassName)
 							);
 			}
-			internal static void writeRenderableObject(FileStream declaration, FileStream implementation, PhysicalObject PO)
+			internal static void writeRenderableObject(FileStream declaration, FileStream implementation, RenderableObject PO)
 			{
 				writeStdInc(declaration);
 				WriteLnIn(declaration, templates["Class:RenderableObject:Declaration"]
-									.Replace(' ', ' ')
+									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
+									.Replace("#Pos#", PO.Pos.ToCppCtor())
+									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
+									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
+									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsDeclaration())
+									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
+									.Replace("#OnRender#", PO.GetComponentsOnRender())
+									.Replace("#OnStart#", PO.GetComponentsOnStart())
+									.Replace("#ClassName#", PO.ClassName)
+									.Replace("#SceneName#", PO.Scn.ClassName)
 							);
 				WriteLnIn(implementation, templates["Class:RenderableObject:Implementation"]
-									.Replace(' ', ' ')
+									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
+									.Replace("#Pos#", PO.Pos.ToCppCtor())
+									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
+									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
+									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsImplementation())
+									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
+									.Replace("#OnRender#", PO.GetComponentsOnRender())
+									.Replace("#OnStart#", PO.GetComponentsOnStart())
+									.Replace("#ClassName#", PO.ClassName)
+									.Replace("#SceneName#", PO.Scn.ClassName)
 							);
 			}
 			internal static void writeScene(FileStream fs, Scene S)
@@ -123,8 +139,10 @@ namespace Glc
 
 				string render = "";
 				foreach (var i in S.ObjectList)
-					if(i is RenderableObject)
+					if (i is RenderableObject)
+					{
 						render += "cam.render(" + i.ObjectName + ".onRender(cam));";//renders
+					}
 
 				string getObjects = "";
 				foreach (var i in S.ObjectList)
@@ -138,7 +156,7 @@ namespace Glc
 												.Replace("#update#", S.GetAllObjectsOnUpdate())
 												.Replace("#render#", render)
 												.Replace("#getObjects#", getObjects)
-							);					
+							);
 			}
 			///<summary>Code generate</summary>
 			internal static void GenerateCode()

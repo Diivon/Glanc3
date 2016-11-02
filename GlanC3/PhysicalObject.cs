@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Glc
 {
@@ -17,7 +18,7 @@ namespace Glc
 		static PhysicalObject() { _count = 0; }
 
 		private static uint _count;
-		override internal void GenerateCode()
+		internal override void GenerateCode()
 		{
 			if (_implementationfilePath == "" || _implementationfilePath == null)
 				throw new Exception("File implementation do not exist for " + ClassName + ", when GenerateCode called");
@@ -35,24 +36,18 @@ namespace Glc
 		{
 			string result = "";
 			foreach (var com in Components)
-			{
 				result += Glance.GatherStringList(com.GetCppVariables(), '\n');
-			}
 			if (result != "")//if no variables, no need for '\n'
 				result += '\n';
 			return result;
 		}
 		internal override string GetComponentsMethodsDeclaration()
 		{
-			string result = "";
-			foreach (var com in Components)
-			{
-				result += Glance.GatherStringList(com.GetCppMethodsDeclaration(), ";\n");
-				Console.WriteLine(Glance.GatherStringList(com.GetCppMethodsDeclaration(), ";\n"));
-			}
-			if (result != "")//if no methods, no need for '\n'
-				result += '\n';
-			return result;
+			List<string> result = new List<string>();
+			foreach (var i in Components)
+				result.AddRange(i.GetCppMethodsDeclaration());
+			result = result.Distinct().ToList();
+			return Glance.GatherStringList(result, ";\n");
 		}
 		internal override string GetComponentsMethodsImplementation()
 		{
@@ -61,7 +56,8 @@ namespace Glc
 			foreach (var i in Components)
 				Glance.MergeDictionary(ref functions, i.GetCppMethodsImplementation());
 			foreach (var i in functions)
-				result += Glance.GetRetTypeFromSignature(i.Key) + ' ' + ClassName + "::" + Glance.GetSignatureWithoutRetType(i.Key) + '{' + i.Value + '}' + '\n';
+				if(i.Key != "")
+					result += Glance.GetRetTypeFromSignature(i.Key) + ' ' + ClassName + "::" + Glance.GetSignatureWithoutRetType(i.Key) + '{' + i.Value + '}' + '\n';
 			return result;
 		}
 		internal override string GetComponentsConstructors()
@@ -83,19 +79,6 @@ namespace Glc
 				if (com.GetCppConstructorBody() == "")
 					continue;
 				result += '\n' + com.GetCppConstructorBody();
-			}
-			if (result != "")
-				result += '\n';
-			return result;
-		}
-		internal override string GetComponentsOnRender()
-		{
-			string result = "";
-			foreach (var com in Components)
-			{
-				if (com.GetCppOnRender() == "")
-					continue;
-				result += "\n" + com.GetCppOnRender();
 			}
 			if (result != "")
 				result += '\n';
