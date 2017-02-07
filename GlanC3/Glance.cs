@@ -120,7 +120,7 @@ namespace Glc
 
 			if (BuildSetting.isCompile)
 			{
-				foreach (var i in scenes[0].ObjectList)
+				foreach (var i in scenes[0].LayerList)
 					BuildSetting.complilerTargets.Add(Glance.BuildSetting.sourceDir + i.ClassName + ".cpp");
 				Process cmd = new Process();
 				cmd.StartInfo = new ProcessStartInfo(@"cmd.exe");

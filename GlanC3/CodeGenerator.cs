@@ -77,7 +77,7 @@ namespace Glc
 									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
-									.Replace("#SceneName#", PO.Scn.ClassName)
+									.Replace("#SceneName#", PO._scene.ClassName)
 							);
 				WriteLnIn(implementation, templates["Class:PhysicalObject:Implementation"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
@@ -88,7 +88,7 @@ namespace Glc
 									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
-									.Replace("#SceneName#", PO.Scn.ClassName)
+									.Replace("#SceneName#", PO._scene.ClassName)
 							);
 			}
 			internal static void writeRenderableObject(FileStream declaration, FileStream implementation, RenderableObject PO)
@@ -104,7 +104,7 @@ namespace Glc
 									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
-									.Replace("#SceneName#", PO.Scn.ClassName)
+									.Replace("#SceneName#", PO._scene.ClassName)
 							);
 				WriteLnIn(implementation, templates["Class:RenderableObject:Implementation"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
@@ -116,36 +116,36 @@ namespace Glc
 									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
-									.Replace("#SceneName#", PO.Scn.ClassName)
+									.Replace("#SceneName#", PO._scene.ClassName)
 							);
 			}
 			internal static void writeScene(FileStream fs, Scene S)
 			{
 				writeStdInc(fs);
-				foreach(var obj in S.ObjectList)
+				foreach(var obj in S.LayerList)
 					WriteLnIn(fs, "#include \"" + obj.ClassName + ".h\"");//includes
 
 				var objects = new List<string>();
-				foreach (var obj in S.ObjectList)
+				foreach (var obj in S.LayerList)
 				{
 					objects.Add("friend class " + obj.ClassName + ';');//friend class
 					objects.Add(obj.ClassName + ' ' + obj.ObjectName + ';');//obj declarations
 				}//objects filling
 
 				string ctors = "";
-				for(int i = 0; i < S.ObjectList.Count - 1; ++i)//
-					ctors += S.ObjectList[i].ObjectName + "(*this), ";//
-				ctors += S.ObjectList[S.ObjectList.Count - 1].ObjectName + "(*this)";//constructors
+				for(int i = 0; i < S.LayerList.Count - 1; ++i)//
+					ctors += S.LayerList[i].ObjectName + "(*this), ";//
+				ctors += S.LayerList[S.LayerList.Count - 1].ObjectName + "(*this)";//constructors
 
 				string render = "";
-				foreach (var i in S.ObjectList)
+				foreach (var i in S.LayerList)
 					if (i is RenderableObject)
 					{
 						render += "cam.render(" + i.ObjectName + ".onRender(cam));";//renders
 					}
 
 				string getObjects = "";
-				foreach (var i in S.ObjectList)
+				foreach (var i in S.LayerList)
 					getObjects += "template<>\n" + i.ClassName + " & getObject<" + i.ClassName + ">(){\nreturn " + i.ObjectName + ";\n}\n";
 
 				WriteLnIn(fs, templates["Сlass:Scene:FDef"]
@@ -161,7 +161,7 @@ namespace Glc
 			///<summary>Code generate</summary>
 			internal static void GenerateCode()
 			{
-				foreach (var SO in	scenes[0].ObjectList)//objects
+				foreach (var SO in	scenes[0].LayerList)//objects
 				{
 					if (SO.ImplementationFilePath == null || SO.ImplementationFilePath == "")
 					{

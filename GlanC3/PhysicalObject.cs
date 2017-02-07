@@ -10,7 +10,7 @@ namespace Glc
 		public Vec2 Pos;
 		public PhysicalObject(Vec2 pos) : base()
 		{
-			Scn = null;
+			_scene = null;
 			Pos = pos;
 			ClassName = "PhysicalObject" + _count++;
 			ObjectName = "Obj" + ClassName;
@@ -24,8 +24,10 @@ namespace Glc
 				throw new Exception("File implementation do not exist for " + ClassName + ", when GenerateCode called");
 			if (_declarationfilePath == "" || _declarationfilePath == null)
 				throw new Exception("File declaration do not exist for " + ClassName + ", when GenerateCode called");
-			if (Scn == null)
+			if (_scene == null)
 				throw new Exception("Object " + ClassName + " haven't Scene, when GenerateCode called");
+			if (_layer == null)
+				throw new Exception("Object " + ClassName + " haven't Layer, when GenerateCode called");
 			var impl = File.Open(_implementationfilePath, FileMode.Truncate);
 			var decl = File.Open(_declarationfilePath, FileMode.Truncate);
 			Glance.CodeGenerator.writePhysicalObject(decl, impl, this);

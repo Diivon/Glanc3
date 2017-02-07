@@ -30,7 +30,7 @@ namespace Glc
 			{
 				if (File.Exists(value))
 					_implementationfilePath = value;
-				else throw new Exception("invalid file path");
+				else throw new ArgumentException("invalid file path");
 			}
 		}
 		public string DeclarationFilePath
@@ -40,7 +40,7 @@ namespace Glc
 			{
 				if (File.Exists(value))
 					_declarationfilePath = value;
-				else throw new Exception("invalid file path");
+				else throw new ArgumentException("invalid file path");
 			}
 		}
 
@@ -55,7 +55,8 @@ namespace Glc
 			get { return _objectName; }
 		}
 		/// <summary>Scene, where this object is</summary>
-		internal Scene Scn;
+		internal Scene _scene;
+		internal Layer _layer;
 		protected string _objectName;
 		protected string _className;
 		protected string _implementationfilePath;

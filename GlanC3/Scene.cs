@@ -6,7 +6,7 @@ namespace Glc
 {
 	public class Scene
 	{
-		internal List<GameObject> ObjectList;
+		internal List<Layer> LayerList;
 		private string _className;
 		public string ClassName
 		{
@@ -35,32 +35,32 @@ namespace Glc
 		{
 			ClassName = "Scene" + _count++;
 			ObjectName = "Obj" + ClassName;
-			ObjectList = new List<GameObject>();
+			LayerList = new List<Layer>();
 		}
-		internal string GetAllObjectsOnStart()
+		internal string GetAllLayersOnStart()
 		{
 			string result = "";
-			foreach (var i in ObjectList)
+			foreach (var i in LayerList)
 				result += i.ObjectName + ".onStart();\n";
 			return result;
 		}
 		internal string GetAllObjectsOnUpdate()
 		{
 			string result = "";
-			foreach (var i in ObjectList)
+			foreach (var i in LayerList)
 				result += i.ObjectName + ".onUpdate(dt);\n";
 			return result;
 		}
 		public void AddObject(GameObject go)
 		{
-			go.Scn = this;
-			ObjectList.Add(go);
+			go._scene = this;
+			LayerList.Add(go);
 		}
 		public void AddObjectsRange(GameObject[] gos)
 		{
 			foreach (var i in gos)
-				i.Scn = this;
-			ObjectList.AddRange(gos);
+				i._scene = this;
+			LayerList.AddRange(gos);
 		}
 	}
 }

@@ -23,8 +23,10 @@ namespace Glc
 				throw new Exception("File implementation do not exist for " + ClassName + ", when GenerateCode called");
 			if (_declarationfilePath == "" || _declarationfilePath == null)
 				throw new Exception("File declaration do not exist for " + ClassName + ", when GenerateCode called");
-			if (Scn == null)
+			if (_scene == null)
 				throw new Exception("Object " + ClassName + " haven't Scene, when GenerateCode called");
+			if (_layer == null)
+				throw new Exception("Object " + ClassName + " haven't Layer, when GenerateCode called");
 			var impl = File.Open(_implementationfilePath, FileMode.Truncate);
 			var decl = File.Open(_declarationfilePath, FileMode.Truncate);
 			Glance.CodeGenerator.writeRenderableObject(decl, impl, this);
