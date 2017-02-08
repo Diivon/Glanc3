@@ -7,11 +7,11 @@ using System;
 class Program {
     static void Main(string[] args) {
 
-		Glance.BuildSetting.outputDir =		@"D:\GC\out\";
-		Glance.BuildSetting.sourceDir =		@"D:\GC\src\";
-		Glance.BuildSetting.includeDir =	@"D:\GC\include\";
-		Glance.BuildSetting.libDir =		@"D:\GC\lib\SFML\";
-		Glance.BuildSetting.settingsDir =	@"D:\GC\settings\";
+		Glance.BuildSetting.outputDir =		@"D:\Glc\out\";
+		Glance.BuildSetting.sourceDir =		@"D:\Glc\src\";
+		Glance.BuildSetting.includeDir =	@"D:\Glc\include\";
+		Glance.BuildSetting.libDir =		@"D:\Glc\lib\SFML\";
+		Glance.BuildSetting.settingsDir =	@"D:\Glc\settings\";
 
 		Glance.BuildSetting.libs.Add("sfml-graphics.lib");
 		Glance.BuildSetting.libs.Add("sfml-window.lib");
@@ -29,27 +29,17 @@ class Program {
 		Glance.BuildSetting.isGenerateCode = true;
 		Glance.BuildSetting.isCompile = true;
 		Glance.BuildSetting.isRunAppAfterCompiling = true;
-		Glance.Init();
+
 		//-------------Client code starts here
-
-
+		
 		var scene = new Scene();
-		
-		var Obj = new RenderableObject(new Vec2(100, 100));
-		var graph = new Glc.Component.GraphicalComponent.Animation(Glc.Component.AnimationType.PingPong);
-		graph.AddFrame(@"resources\n\1.jpg", 500);
-		graph.AddFrame(@"resources\n\2.jpg", 500);
-		graph.AddFrame(@"resources\n\3.jpg", 500);
-		Obj.GraphComponent = graph;
-		Obj.Components.Add(new Glc.Component.Sound(@"resources\kek.wav"));
-		Obj.Components.Add(new Glc.Component.Script(@"C:\Users\Влад\Desktop\jaj.cpp"));
-		scene.AddObject(Obj);
-		
-		//var Obj2 = new RenderableObject(new Vec2(500,500));
-		//Obj2.GraphComponent = new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\2.jpg");
-		//Obj2.Components.Add(new Glc.Component.Script(@"C:\Users\Влад\Desktop\kek.cpp"));
-		//scene.AddObject(Obj2);
+		var layer = new Layer();
 
+		var obj = new RenderableObject(new Vec2(50, 50));
+		obj.GraphComponent = new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg");
+
+		layer.AddObject(obj);
+		scene.AddLayer(layer);
 		Glance.scenes.Add(scene);
 		
 		//-------------Client code ends here

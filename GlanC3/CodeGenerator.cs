@@ -119,44 +119,47 @@ namespace Glc
 									.Replace("#SceneName#", PO._scene.ClassName)
 							);
 			}
+			internal static void writeLayer(FileStream declaration, FileStream implementation, Layer PO)
+			{
+				writeStdInc(declaration);
+				WriteLnIn(implementation, templates["Class:Layer:Implementation"]);
+				WriteLnIn(declaration, templates["Class:Layer:Declaration"]);
+			}
 			internal static void writeScene(FileStream fs, Scene S)
 			{
 				writeStdInc(fs);
-				foreach(var obj in S.LayerList)
-					WriteLnIn(fs, "#include \"" + obj.ClassName + ".h\"");//includes
+				foreach(var obj in S.LayerList)                 //includes
+					WriteLnIn(fs, "#include \"" + obj.ClassName + ".h\"");
 
-				var objects = new List<string>();
-				foreach (var obj in S.LayerList)
-				{
-					objects.Add("friend class " + obj.ClassName + ';');//friend class
-					objects.Add(obj.ClassName + ' ' + obj.ObjectName + ';');//obj declarations
-				}//objects filling
+				string layers = "";
+				foreach (var i in S.LayerList)
+					layers += i.ClassName + ' ' + i.ObjectName;	//variables
 
 				string ctors = "";
-				for(int i = 0; i < S.LayerList.Count - 1; ++i)//
-					ctors += S.LayerList[i].ObjectName + "(*this), ";//
-				ctors += S.LayerList[S.LayerList.Count - 1].ObjectName + "(*this)";//constructors
-
-				string render = "";
 				foreach (var i in S.LayerList)
-					if (i is RenderableObject)
-					{
-						render += "cam.render(" + i.ObjectName + ".onRender(cam));";//renders
-					}
+					ctors += S.ObjectName + "(*this), ";		//constructors
+				ctors.Remove(ctors.Length - 2, 2);
 
-				string getObjects = "";
+				string start = "";
 				foreach (var i in S.LayerList)
-					getObjects += "template<>\n" + i.ClassName + " & getObject<" + i.ClassName + ">(){\nreturn " + i.ObjectName + ";\n}\n";
+					start += i.ObjectName + ".onStart();\n";    //onStarts
+
+				string update = "";
+				foreach (var i in S.LayerList)
+					update += i.ObjectName + ".onUpdate(dt);\n";//onUpdates
+
+				string getLayers = "";
+				foreach (var i in S.LayerList)					//getLayers
+					getLayers += "template<>\n" + i.ClassName + " & getLayer(){\n" + "return " + i.ObjectName + ";\n}";
 
 				WriteLnIn(fs, templates["Сlass:Scene:FDef"]
-												.Replace("#ClassName#", S.ClassName)
-												.Replace("#Objects#", Glance.GatherStringList(objects, '\n'))
-												.Replace("#Ctors#", ctors)
-												.Replace("#start#", S.GetAllObjectsOnStart())
-												.Replace("#update#", S.GetAllObjectsOnUpdate())
-												.Replace("#render#", render)
-												.Replace("#getObjects#", getObjects)
-							);
+									.Replace("#ClassName#", S.ClassName)
+									.Replace("#Layers#", layers)
+									.Replace("#Ctors#", ctors)
+									.Replace("#start#", start)
+									.Replace("#update#", update)
+									.Replace("#getLayers#", getLayers)
+					);
 			}
 			///<summary>Code generate</summary>
 			internal static void GenerateCode()
@@ -181,6 +184,15 @@ namespace Glc
 					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].ClassName + ".h");
 					writeScene(Scfs, scenes[0]);
 					Scfs.Close();
+				}
+				{//layers	
+					foreach (var i in scenes)
+						foreach(var o in i.LayerList)
+						{
+							var Lrhfs = File.Create(BuildSetting.sourceDir + o.ClassName + ".h");
+							var Lrcppfs = File.Create(BuildSetting.sourceDir + o.ClassName + ".cpp");
+							writeLayer(Lrhfs, Lrcppfs, o);
+						}
 				}
 				{//mainh
 					var mainHfs = File.Create(BuildSetting.sourceDir + "main.h");

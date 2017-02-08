@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Glc
 {
-	class Layer
+	public class Layer
 	{
 		public Layer()
 		{
@@ -14,6 +14,7 @@ namespace Glc
 			_objectName = "layerObject" + _count;
 			_implementationFilePath = null;
 			_declarationFilePath = null;
+			_objects = new List<GameObject>();
 		}
 		public void AddObject(GameObject o)
 		{
@@ -25,6 +26,8 @@ namespace Glc
 		{
 
 		}
+
+		/// <summary>Name of this object for client, and name of this object class in cpp code</summary>
 		public string ClassName
 		{
 			set
@@ -46,6 +49,7 @@ namespace Glc
 				else throw new ArgumentException("invalid file path");
 			}
 		}
+		/// <summary>Path to .cpp file of this object</summary>
 		public string DeclarationFilePath
 		{
 			get { return _declarationFilePath; }
@@ -56,6 +60,7 @@ namespace Glc
 				else throw new ArgumentException("invalid file path");
 			}
 		}
+		/// <summary>Name of this object in cpp code</summary>
 		internal string ObjectName
 		{
 			set
@@ -80,17 +85,19 @@ namespace Glc
 			impl.Close();
 			decl.Close();
 		}
-		/// <summary>return all components necessary Variables</summary>
+		/// <summary>return all variables of this layer</summary>
 		internal string GetVariables()
 		{
 			string result = "";
 			foreach (var i in _scripts)
 				result += Glance.GatherStringList(i.GetCppVariables(), ";\n");
+			foreach (var i in _objects)
+				result += i.ClassName + ' ' + i.ObjectName + ";\n";
 			if (result != "")
 				result += '\n';
 			return result;
 		}
-		/// <summary>return all components necessary Methods</summary>
+		/// <summary>return all methods declaration of this layer</summary>
 		internal string GetMethodsDeclaration()
 		{
 			List<string> result = new List<string>();
@@ -99,7 +106,7 @@ namespace Glc
 			result = result.Distinct().ToList();
 			return Glance.GatherStringList(result, ";\n");
 		}
-		/// <summary>return all components necessary Methods declaration</summary>
+		/// <summary>return all methods implementation of this layer</summary>
 		internal string GetMethodsImplementation()
 		{
 			string result = "";
@@ -111,8 +118,14 @@ namespace Glc
 					result += Glance.GetRetTypeFromSignature(i.Key) + ' ' + ClassName + "::" + Glance.GetSignatureWithoutRetType(i.Key) + '{' + i.Value + '}' + '\n';
 			return result;
 		}
-		/// <summary>return all components necessary Constructors</summary>
-		internal string GetConstructor();
+		/// <summary>return constructor syntax for all holded objects</summary>
+		internal string GetConstructor()
+		{
+			string result = ", ";
+			foreach (var i in _objects)
+				result += i.ObjectName + "(scene, *this)";
+			return result;
+		}
 		/// <summary>return all components necessary Constructor code</summary>
 		internal string GetConstructorBody()
 		{
@@ -143,14 +156,15 @@ namespace Glc
 			return result;
 		}
 
+		internal Scene _scene;
 		/// <summary>All GameObjects in this layer</summary>
 		protected List<GameObject> _objects;
+		/// <summary>All Scripts for this layer</summary>
 		protected List<Component.Script> _scripts;
-		protected string _className;
+		internal string _className;
 		protected string _objectName;
-		protected string _implementationFilePath;
-		protected string _declarationFilePath;
-		protected Scene _scene;
+		internal string _implementationFilePath;
+		internal string _declarationFilePath;
 		private static uint _count;
 		static Layer() { _count = 0; }
 	}

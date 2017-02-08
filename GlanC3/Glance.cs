@@ -90,15 +90,9 @@ namespace Glc
 		{
 			scenes.Add(s);
 		}
-		public static void Init()
-		{
-			var files = Directory.GetFiles(BuildSetting.settingsDir, "T_*.gcs");
-			foreach (var file in files)
-				ParseGCS(File.ReadAllLines(file), ref templates);
-			ParseGCS(File.ReadAllLines(BuildSetting.settingsDir + "settings.gcs"), ref settings);
-		}
 		public static void Build()
 		{
+			Init();
 			if (BuildSetting.isGenerateCode)
 			{
 				if (BuildSetting.isClearSrcDir)
@@ -140,6 +134,13 @@ namespace Glc
 			Console.ReadKey();
 		}
 
+		private static void Init()
+		{
+			var files = Directory.GetFiles(BuildSetting.settingsDir, "T_*.gcs");
+			foreach (var file in files)
+				ParseGCS(File.ReadAllLines(file), ref templates);
+			ParseGCS(File.ReadAllLines(BuildSetting.settingsDir + "settings.gcs"), ref settings);
+		}
 		///<summary>collection of code presets for all occasions(Class templates as example)</summary>
 		internal static Dictionary<string, string> templates;
 		///<summary>else settings for building</summary>

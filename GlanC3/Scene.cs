@@ -44,19 +44,19 @@ namespace Glc
 				result += i.ObjectName + ".onStart();\n";
 			return result;
 		}
-		internal string GetAllObjectsOnUpdate()
+		internal string GetAllLayersOnUpdate()
 		{
 			string result = "";
 			foreach (var i in LayerList)
 				result += i.ObjectName + ".onUpdate(dt);\n";
 			return result;
 		}
-		public void AddObject(GameObject go)
+		public void AddLayer(Layer go)
 		{
 			go._scene = this;
 			LayerList.Add(go);
 		}
-		public void AddObjectsRange(GameObject[] gos)
+		public void AddLayersRange(Layer[] gos)
 		{
 			foreach (var i in gos)
 				i._scene = this;
