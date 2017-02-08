@@ -15,6 +15,7 @@ namespace Glc
 			_implementationFilePath = null;
 			_declarationFilePath = null;
 			_objects = new List<GameObject>();
+			_scripts = new List<Component.Script>();
 		}
 		public void AddObject(GameObject o)
 		{
@@ -158,9 +159,9 @@ namespace Glc
 
 		internal Scene _scene;
 		/// <summary>All GameObjects in this layer</summary>
-		protected List<GameObject> _objects;
+		internal List<GameObject> _objects;
 		/// <summary>All Scripts for this layer</summary>
-		protected List<Component.Script> _scripts;
+		internal List<Component.Script> _scripts;
 		internal string _className;
 		protected string _objectName;
 		internal string _implementationFilePath;

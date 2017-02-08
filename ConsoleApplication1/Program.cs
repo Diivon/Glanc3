@@ -31,7 +31,6 @@ class Program {
 		Glance.BuildSetting.isRunAppAfterCompiling = true;
 
 		//-------------Client code starts here
-		
 		var scene = new Scene();
 		var layer = new Layer();
 
@@ -45,6 +44,7 @@ class Program {
 		//-------------Client code ends here
 
 		Glance.Build();
-
+		GC.Collect();
+		Console.ReadKey();
     }
 }

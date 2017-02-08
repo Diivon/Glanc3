@@ -131,7 +131,6 @@ namespace Glc
 				}
 				cmd.Dispose();
 			}
-			Console.ReadKey();
 		}
 
 		private static void Init()

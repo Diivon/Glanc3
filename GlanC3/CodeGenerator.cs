@@ -119,11 +119,38 @@ namespace Glc
 									.Replace("#SceneName#", PO._scene.ClassName)
 							);
 			}
-			internal static void writeLayer(FileStream declaration, FileStream implementation, Layer PO)
+			internal static void writeLayer(FileStream declaration, FileStream implementation, Layer l)
 			{
 				writeStdInc(declaration);
-				WriteLnIn(implementation, templates["Class:Layer:Implementation"]);
-				WriteLnIn(declaration, templates["Class:Layer:Declaration"]);
+				{
+					string getObjects = "";
+					foreach (var i in l._objects)
+						getObjects += "template<>\n" + i.ClassName + ' ' + "getObject(){\nreturn " + i.ObjectName + ";\n}";
+
+					WriteLnIn(declaration, templates["Class:Layer:Declaration"]
+										.Replace("#SceneName#", l._scene.ClassName)
+										.Replace("#ClassName#", l.ClassName)
+										.Replace("#ObjectVariables#", l.GetVariables())
+										.Replace("#ComponentsVariables#", "")
+										.Replace("#ComponentsMethodsDeclaration#", l.GetMethodsDeclaration())
+										.Replace("#getObjects#", getObjects)
+						);
+				}//declaration
+				{
+					string ctorList = "";
+					foreach (var i in l._objects)
+						ctorList += ", " + i.ObjectName + "(scene, *this)";
+
+					WriteLnIn(implementation, templates["Class:Layer:Implementation"]
+										.Replace("#SceneName#", l._scene.ClassName)
+										.Replace("#ClassName#", l.ClassName)
+										.Replace("#AdditionalConstructorList#", ctorList)
+										.Replace("#ConstructorBody#", l.GetConstructorBody())
+										.Replace("#OnStart#", l.GetOnStart())
+										.Replace("#OnUpdate#", l.GetOnUpdate())
+										.Replace("#ComponentsMethodsImplementation#", l.GetMethodsImplementation())
+						);
+				}
 			}
 			internal static void writeScene(FileStream fs, Scene S)
 			{
