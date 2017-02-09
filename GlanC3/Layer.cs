@@ -61,6 +61,15 @@ namespace Glc
 				else throw new ArgumentException("invalid file path");
 			}
 		}
+
+		public string GetDeclarationFileName()
+		{
+			return _scene.ClassName + '-' + ClassName + ".h";
+		}
+		public string GetImplementationFileName()
+		{
+			return _scene.ClassName + '-' + ClassName + ".cpp";
+		}
 		/// <summary>Name of this object in cpp code</summary>
 		internal string ObjectName
 		{

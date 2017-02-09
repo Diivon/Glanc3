@@ -59,7 +59,6 @@ namespace Glc
 			internal static void writeMainH(FileStream fs)
 			{
 				writeStdInc(fs);
-				WriteLnIn(fs, "#include \"GC/Camera.h\"");
 				foreach (var Scn in scenes)
 					WriteLnIn(fs, "#include \"" + Scn.ClassName + ".h\"");
 			}
@@ -94,6 +93,7 @@ namespace Glc
 			internal static void writeRenderableObject(FileStream declaration, FileStream implementation, RenderableObject PO)
 			{
 				writeStdInc(declaration);
+
 				WriteLnIn(declaration, templates["Class:RenderableObject:Declaration"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
 									.Replace("#Pos#", PO.Pos.ToCppCtor())
@@ -105,6 +105,7 @@ namespace Glc
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO._scene.ClassName)
+									.Replace("#LayerName#", PO._layer.ClassName)
 							);
 				WriteLnIn(implementation, templates["Class:RenderableObject:Implementation"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
@@ -125,7 +126,11 @@ namespace Glc
 				{
 					string getObjects = "";
 					foreach (var i in l._objects)
-						getObjects += "template<>\n" + i.ClassName + ' ' + "getObject(){\nreturn " + i.ObjectName + ";\n}";
+						getObjects += "template<>\n" + i.ClassName + " & getObject(){\nreturn " + i.ObjectName + ";\n}";
+
+					string objDeclInclude = "";
+					foreach (var i in l._objects)
+						objDeclInclude += "#include \"" + i.GetDeclarationFileName() + "\"\n";
 
 					WriteLnIn(declaration, templates["Class:Layer:Declaration"]
 										.Replace("#SceneName#", l._scene.ClassName)
@@ -134,6 +139,7 @@ namespace Glc
 										.Replace("#ComponentsVariables#", "")
 										.Replace("#ComponentsMethodsDeclaration#", l.GetMethodsDeclaration())
 										.Replace("#getObjects#", getObjects)
+										.Replace("#ObjectsDeclarationInclude#", objDeclInclude)
 						);
 				}//declaration
 				{
@@ -150,22 +156,22 @@ namespace Glc
 										.Replace("#OnUpdate#", l.GetOnUpdate())
 										.Replace("#ComponentsMethodsImplementation#", l.GetMethodsImplementation())
 						);
-				}
+				}//implementation
 			}
 			internal static void writeScene(FileStream fs, Scene S)
 			{
 				writeStdInc(fs);
 				foreach(var obj in S.LayerList)                 //includes
-					WriteLnIn(fs, "#include \"" + obj.ClassName + ".h\"");
+					WriteLnIn(fs, "#include \"" + obj.GetDeclarationFileName() + '"');
 
 				string layers = "";
 				foreach (var i in S.LayerList)
-					layers += i.ClassName + ' ' + i.ObjectName;	//variables
+					layers += i.ClassName + ' ' + i.ObjectName + ";\n";	//variables
 
 				string ctors = "";
 				foreach (var i in S.LayerList)
-					ctors += S.ObjectName + "(*this), ";		//constructors
-				ctors.Remove(ctors.Length - 2, 2);
+					ctors += i.ObjectName + "(*this), ";		//constructors
+				ctors = ctors.Remove(ctors.Length - 2, 2);
 
 				string start = "";
 				foreach (var i in S.LayerList)
@@ -179,6 +185,10 @@ namespace Glc
 				foreach (var i in S.LayerList)					//getLayers
 					getLayers += "template<>\n" + i.ClassName + " & getLayer(){\n" + "return " + i.ObjectName + ";\n}";
 
+				string layerDeclInclude = "";
+				foreach (var i in S.LayerList)
+					layerDeclInclude += "#include \"" + i.GetDeclarationFileName() + "\"\n";
+
 				WriteLnIn(fs, templates["Сlass:Scene:FDef"]
 									.Replace("#ClassName#", S.ClassName)
 									.Replace("#Layers#", layers)
@@ -186,29 +196,33 @@ namespace Glc
 									.Replace("#start#", start)
 									.Replace("#update#", update)
 									.Replace("#getLayers#", getLayers)
+									.Replace("#LayersDeclarationInclude#", layerDeclInclude)
 					);
 			}
 			///<summary>Code generate</summary>
 			internal static void GenerateCode()
 			{
-				foreach (var SO in	scenes[0].LayerList)//objects
+				foreach (var Lr in	scenes[0].LayerList)//objects
 				{
-					if (SO.ImplementationFilePath == null || SO.ImplementationFilePath == "")
+					foreach (var SO in Lr._objects)
 					{
-						string implFileName = BuildSetting.sourceDir + SO.ClassName + ".cpp";
-						File.Create(implFileName).Close();
-						SO.ImplementationFilePath = implFileName;
+						if (SO.ImplementationFilePath == null || SO.ImplementationFilePath == "")
+						{
+							string implFileName = BuildSetting.sourceDir + SO.GetImplementationFileName();
+							File.Create(implFileName).Close();
+							SO.ImplementationFilePath = implFileName;
+						}
+						if (SO.DeclarationFilePath == null || SO.DeclarationFilePath == "")
+						{
+							string declFileName = BuildSetting.sourceDir + SO.GetDeclarationFileName();
+							File.Create(declFileName).Close();
+							SO.DeclarationFilePath = declFileName;
+						}
+						SO.GenerateCode();
 					}
-					if (SO.DeclarationFilePath == null || SO.DeclarationFilePath == "")
-					{
-						string declFileName = BuildSetting.sourceDir + SO.ClassName + ".h";
-						File.Create(declFileName).Close();
-						SO.DeclarationFilePath = declFileName;
-					}
-					SO.GenerateCode();
 				}
 				{//scenes
-					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].ClassName + ".h");
+					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].GetDeclarationFileName());
 					writeScene(Scfs, scenes[0]);
 					Scfs.Close();
 				}
@@ -216,8 +230,8 @@ namespace Glc
 					foreach (var i in scenes)
 						foreach(var o in i.LayerList)
 						{
-							var Lrhfs = File.Create(BuildSetting.sourceDir + o.ClassName + ".h");
-							var Lrcppfs = File.Create(BuildSetting.sourceDir + o.ClassName + ".cpp");
+							var Lrhfs = File.Create(BuildSetting.sourceDir + o.GetDeclarationFileName());
+							var Lrcppfs = File.Create(BuildSetting.sourceDir + o.GetImplementationFileName());
 							writeLayer(Lrhfs, Lrcppfs, o);
 						}
 				}

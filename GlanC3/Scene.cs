@@ -6,8 +6,12 @@ namespace Glc
 {
 	public class Scene
 	{
-		internal List<Layer> LayerList;
-		private string _className;
+		public Scene()
+		{
+			ClassName = "Scene" + _count++;
+			ObjectName = "Obj" + ClassName;
+			LayerList = new List<Layer>();
+		}
 		public string ClassName
 		{
 			set
@@ -18,7 +22,6 @@ namespace Glc
 			}
 			get { return _className; }
 		}
-		private string _objectName;
 		public string ObjectName
 		{
 			set
@@ -29,14 +32,25 @@ namespace Glc
 			}
 			get { return _objectName; }
 		}
+		public void AddLayer(Layer go)
+		{
+			go._scene = this;
+			LayerList.Add(go);
+		}
+		public void AddLayersRange(Layer[] gos)
+		{
+			foreach (var i in gos)
+				i._scene = this;
+			LayerList.AddRange(gos);
+		}
+		public string GetDeclarationFileName()
+		{
+			return ClassName + ".h";
+		}
+		private string _className;
+		private string _objectName;
 		private static int _count;
 		static Scene() { _count = 0; }
-		public Scene()
-		{
-			ClassName = "Scene" + _count++;
-			ObjectName = "Obj" + ClassName;
-			LayerList = new List<Layer>();
-		}
 		internal string GetAllLayersOnStart()
 		{
 			string result = "";
@@ -51,16 +65,6 @@ namespace Glc
 				result += i.ObjectName + ".onUpdate(dt);\n";
 			return result;
 		}
-		public void AddLayer(Layer go)
-		{
-			go._scene = this;
-			LayerList.Add(go);
-		}
-		public void AddLayersRange(Layer[] gos)
-		{
-			foreach (var i in gos)
-				i._scene = this;
-			LayerList.AddRange(gos);
-		}
+		internal List<Layer> LayerList;
 	}
 }

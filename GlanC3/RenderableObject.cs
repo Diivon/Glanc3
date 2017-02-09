@@ -135,9 +135,7 @@ namespace Glc
 		}
 		internal virtual string GetComponentsOnRender()
 		{
-			if (GraphComponent == null)
-				throw new InvalidOperationException("Graphical Component for Object " + ClassName + "is empty");
-			return GraphComponent.GetCppOnRender() + '\n';
+			return "";
 		}
 	}
 }

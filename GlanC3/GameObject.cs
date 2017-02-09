@@ -84,5 +84,14 @@ namespace Glc
 		internal abstract string GetComponentsOnUpdate();
 		/// <summary>return all components necessary OnStart code</summary>
 		internal abstract string GetComponentsOnStart();
+		///
+		internal string GetDeclarationFileName()
+		{
+			return _scene.ClassName + '-' + _layer.ClassName + '-' + ClassName + ".h";
+		}
+		internal string GetImplementationFileName()
+		{
+			return _scene.ClassName + '-' + _layer.ClassName + '-' + ClassName + ".cpp";
+		}
 	}
 }

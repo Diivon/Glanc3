@@ -42,6 +42,10 @@
   <ItemGroup>
     <Compile Include="CodeGenerator.cs" />
     <Compile Include="Component.cs" />
+    <Compile Include="Com_Animation.cs" />
+    <Compile Include="Com_Animator.cs" />
+    <Compile Include="Com_GraphicalComponent.cs" />
+    <Compile Include="Com_Sound.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Glance.cs" />
     <Compile Include="Layer.cs" />
@@ -53,6 +57,8 @@
     </Compile>
     <Compile Include="RenderableObject.cs" />
     <Compile Include="Scene.cs" />
+    <Compile Include="Com_Sprite.cs" />
+    <Compile Include="Com_Script.cs" />
     <Compile Include="SpriteFrame.cs" />
     <Compile Include="PhysicalObject.cs" />
     <Compile Include="Vec2.cs" />

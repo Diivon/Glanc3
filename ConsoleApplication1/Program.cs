@@ -1,7 +1,4 @@
 ﻿using Glc;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System;
 
 class Program {
@@ -37,9 +34,9 @@ class Program {
 		var obj = new RenderableObject(new Vec2(50, 50));
 		obj.GraphComponent = new Glc.Component.GraphicalComponent.StaticSprite(@"resources\n\1.jpg");
 
-		layer.AddObject(obj);
-		scene.AddLayer(layer);
 		Glance.scenes.Add(scene);
+		scene.AddLayer(layer);
+		layer.AddObject(obj);
 		
 		//-------------Client code ends here
 
