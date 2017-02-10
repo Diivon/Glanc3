@@ -13,6 +13,7 @@ namespace Glc
 		{
 			GraphComponent = null;
 			ClassName = "RenderableObject" + _count++;
+			ObjectName = "Obj" + ClassName;
 		}
 		static RenderableObject() { _count = 0; }
 

@@ -126,11 +126,19 @@ namespace Glc
 				{
 					string getObjects = "";
 					foreach (var i in l._objects)
-						getObjects += "template<>\n" + i.ClassName + " & getObject(){\nreturn " + i.ObjectName + ";\n}";
+					{
+						getObjects += "template<>\n" + i.ClassName + " & getObject(){\nreturn " + i.ObjectName + ";\n}\n";
+						getObjects += "template<>\nconst " + i.ClassName + " & getObject() const{\nreturn " + i.ObjectName + ";\n}\n";
+					}
 
 					string objDeclInclude = "";
 					foreach (var i in l._objects)
 						objDeclInclude += "#include \"" + i.GetDeclarationFileName() + "\"\n";
+
+					string renderLayer = "template<>\nvoid ::gc::Renderer::render(const " + l.ClassName + " & l){\n";
+					foreach (var i in l._objects)
+						renderLayer += "this->renderLayer(l.getObject<" + i.ClassName + ">());\n";
+					renderLayer += '}';
 
 					WriteLnIn(declaration, templates["Class:Layer:Declaration"]
 										.Replace("#SceneName#", l._scene.ClassName)
@@ -140,6 +148,7 @@ namespace Glc
 										.Replace("#ComponentsMethodsDeclaration#", l.GetMethodsDeclaration())
 										.Replace("#getObjects#", getObjects)
 										.Replace("#ObjectsDeclarationInclude#", objDeclInclude)
+										.Replace("#RenderLayer#", renderLayer)
 						);
 				}//declaration
 				{
@@ -182,12 +191,20 @@ namespace Glc
 					update += i.ObjectName + ".onUpdate(dt);\n";//onUpdates
 
 				string getLayers = "";
-				foreach (var i in S.LayerList)					//getLayers
-					getLayers += "template<>\n" + i.ClassName + " & getLayer(){\n" + "return " + i.ObjectName + ";\n}";
+				foreach (var i in S.LayerList)                  //getLayers
+				{
+					getLayers += "template<>\n" + i.ClassName + " & getLayer(){\n" + "return " + i.ObjectName + ";\n}\n";
+					getLayers += "template<>\nconst " + i.ClassName + " & getLayer() const{\n" + "return " + i.ObjectName + ";\n}\n";
+				}
 
 				string layerDeclInclude = "";
-				foreach (var i in S.LayerList)
+				foreach (var i in S.LayerList)					//includes
 					layerDeclInclude += "#include \"" + i.GetDeclarationFileName() + "\"\n";
+
+				string renderScene = "template<>\nvoid ::gc::Renderer::renderScene(const " + S.ClassName + " & s){\n";
+				foreach (var i in S.LayerList)					//renderScene 
+						renderScene += "this->renderLayer(s.getLayer<" + i.ClassName + ">());\n";
+				renderScene += '}';
 
 				WriteLnIn(fs, templates["Сlass:Scene:FDef"]
 									.Replace("#ClassName#", S.ClassName)
@@ -197,6 +214,7 @@ namespace Glc
 									.Replace("#update#", update)
 									.Replace("#getLayers#", getLayers)
 									.Replace("#LayersDeclarationInclude#", layerDeclInclude)
+									.Replace("#RenderScene#", renderScene)
 					);
 			}
 			///<summary>Code generate</summary>
