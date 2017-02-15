@@ -55,7 +55,10 @@ namespace Glc
 				result.AddRange(i.GetCppMethodsDeclaration());
 			result.AddRange(GraphComponent.GetCppMethodsDeclaration());
 			result = result.Distinct().ToList();
-			return Glance.GatherStringList(result, ";\n");
+			if (result.Count == 0)
+				return "";
+			else
+				return Glance.GatherStringList(result, ";\n");
 		}
 		internal override string GetComponentsMethodsImplementation()
 		{
@@ -133,10 +136,6 @@ namespace Glc
 			if (result == "")
 				result += '\n';
 			return result;
-		}
-		internal virtual string GetComponentsOnRender()
-		{
-			return "";
 		}
 	}
 }

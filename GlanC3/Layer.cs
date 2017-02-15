@@ -25,7 +25,7 @@ namespace Glc
 		}
 		public void AddScript(Component.Script s)
 		{
-
+			_scripts.Add(s);
 		}
 
 		/// <summary>Name of this object for client, and name of this object class in cpp code</summary>
@@ -151,6 +151,9 @@ namespace Glc
 				if (temp != "")
 					result += '\n' + i.GetCppOnUpdate();
 			}
+			result += '\n';
+			foreach (var i in _objects)
+				result += i.ObjectName + ".onUpdate(dt);\n";
 			return result;
 		}
 		/// <summary>return all components necessary OnStart code</summary>
@@ -163,6 +166,9 @@ namespace Glc
 				if (temp != "")
 					result += '\n' + i.GetCppOnStart();
 			}
+			result += '\n';
+			foreach (var i in _objects)
+				result += i.ObjectName + ".onStart();\n";
 			return result;
 		}
 

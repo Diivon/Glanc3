@@ -60,7 +60,7 @@ namespace Glc.Component
 			{
 				string code = "";
 				foreach (var i in Frames)
-					code += Glance.NameSetting.AnimationName + ".emplaceFrame(" + Glance.ToCppString(i.PicName) + ", " + i.Duration.ToString("0.00").Replace(',', '.') + "f);\n";
+					code += Glance.NameSetting.AnimationName + ".emplaceFrame(" + Glance.ToCppString(i.FilePath) + ", " + i.Duration.ToString("0.00").Replace(',', '.') + "f);\n";
 				return _GetProcessed(Glance.templates["Com:Animation:ConstructorBody"].Replace("#SpriteFrames#", code));
 			}
 			internal override string GetCppOnUpdate()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
@@ -69,7 +68,7 @@ namespace Glc
 				writeStdInc(declaration);
 				WriteLnIn(declaration, templates["Class:PhysicalObject:Declaration"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
-									.Replace("#Pos#" , PO.Pos.ToCppCtor())
+									.Replace("#Pos#" , PO.Pos.GetCppCtor())
 									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsDeclaration())
@@ -80,7 +79,7 @@ namespace Glc
 							);
 				WriteLnIn(implementation, templates["Class:PhysicalObject:Implementation"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
-									.Replace("#Pos#", PO.Pos.ToCppCtor())
+									.Replace("#Pos#", PO.Pos.GetCppCtor())
 									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsImplementation())
@@ -96,12 +95,11 @@ namespace Glc
 
 				WriteLnIn(declaration, templates["Class:RenderableObject:Declaration"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
-									.Replace("#Pos#", PO.Pos.ToCppCtor())
+									.Replace("#Pos#", PO.Pos.GetCppCtor())
 									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsDeclaration())
 									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
-									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO._scene.ClassName)
@@ -109,15 +107,15 @@ namespace Glc
 							);
 				WriteLnIn(implementation, templates["Class:RenderableObject:Implementation"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
-									.Replace("#Pos#", PO.Pos.ToCppCtor())
+									.Replace("#Pos#", PO.Pos.GetCppCtor())
 									.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 									.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 									.Replace("#ComponentsMethods#", PO.GetComponentsMethodsImplementation())
 									.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
-									.Replace("#OnRender#", PO.GetComponentsOnRender())
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO._scene.ClassName)
+									.Replace("#LayerName#", PO._layer.ClassName)
 							);
 			}
 			internal static void writeLayer(FileStream declaration, FileStream implementation, Layer l)
@@ -135,10 +133,10 @@ namespace Glc
 					foreach (var i in l._objects)
 						objDeclInclude += "#include \"" + i.GetDeclarationFileName() + "\"\n";
 
-					string renderLayer = "template<>\nvoid ::gc::Renderer::render(const " + l.ClassName + " & l){\n";
+					string render = "template<>\ninline void ::gc::Renderer::renderLayer(const " + l.ClassName + " & l){\n";
 					foreach (var i in l._objects)
-						renderLayer += "this->renderLayer(l.getObject<" + i.ClassName + ">());\n";
-					renderLayer += '}';
+						render += "this->render(l.getObject<" + i.ClassName + ">().getSprite());\n";
+					render += '}';
 
 					WriteLnIn(declaration, templates["Class:Layer:Declaration"]
 										.Replace("#SceneName#", l._scene.ClassName)
@@ -148,7 +146,7 @@ namespace Glc
 										.Replace("#ComponentsMethodsDeclaration#", l.GetMethodsDeclaration())
 										.Replace("#getObjects#", getObjects)
 										.Replace("#ObjectsDeclarationInclude#", objDeclInclude)
-										.Replace("#RenderLayer#", renderLayer)
+										.Replace("#RenderLayer#", render)
 						);
 				}//declaration
 				{
@@ -201,7 +199,7 @@ namespace Glc
 				foreach (var i in S.LayerList)					//includes
 					layerDeclInclude += "#include \"" + i.GetDeclarationFileName() + "\"\n";
 
-				string renderScene = "template<>\nvoid ::gc::Renderer::renderScene(const " + S.ClassName + " & s){\n";
+				string renderScene = "template<>\ninline void ::gc::Renderer::renderScene(const " + S.ClassName + " & s){\n";
 				foreach (var i in S.LayerList)					//renderScene 
 						renderScene += "this->renderLayer(s.getLayer<" + i.ClassName + ">());\n";
 				renderScene += '}';

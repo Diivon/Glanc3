@@ -8,12 +8,12 @@ namespace Glc.Component
 {
 	public abstract partial class GraphicalComponent : Component
 	{
-		public class StaticSprite : GraphicalComponent
+		public class Sprite : GraphicalComponent
 		{
 			string FileName;
 			/// <summary></summary>
 			/// <param name="fn">File name of picture</param>
-			public StaticSprite(string fn)
+			public Sprite(string fn)
 			{
 				FileName = fn;
 			}

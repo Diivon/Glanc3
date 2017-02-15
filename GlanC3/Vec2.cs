@@ -14,7 +14,9 @@ namespace Glc
 			this.x = x;
 			this.y = y;
 		}
-		public string ToCppCtor()
+		/// <summary>Returns cpp code which create gc::Vec2</summary>
+		/// <returns>::gc::Vec2(x, y)</returns>
+		public string GetCppCtor()
 		{
 			return "::gc::Vec2(" + x + ", " + y + ')';
 		}

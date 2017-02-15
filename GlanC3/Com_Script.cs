@@ -8,7 +8,7 @@ namespace Glc.Component
 {
 	public class Script : Component
 	{
-		public string file;
+		public string FileName;
 		public void Validate()
 		{
 			string onUpdateCode = GetCppOnUpdate();
@@ -25,9 +25,11 @@ namespace Glc.Component
 			fs.Write(arr, 0, arr.Length);
 			fs.Close();
 		}
-		public Script(string filepath)
+		public Script(string filename)
 		{
-			file = filepath;
+			if (!File.Exists(Glance.BuildSetting.scriptsDir + filename))
+				throw new ArgumentException();
+			FileName = Glance.BuildSetting.scriptsDir + filename;
 			_data = new _Data(this);
 		}
 		internal override string[] GetCppVariables()
@@ -59,7 +61,6 @@ namespace Glc.Component
 			return _data.MethodsImplementations;
 		}
 		private _Data _data;
-
 		private class _Data
 		{
 			public _Data(Script s)
@@ -96,7 +97,7 @@ namespace Glc.Component
 				if (_isInitializated)
 					return;
 				//
-				var strings = File.ReadAllLines(_owner.file);
+				var strings = File.ReadAllLines(_owner.FileName);
 				bool isInsideVariablesRegion = false;
 				bool isInsideMethodsRegion = false;
 				bool isInsideMethod = false;

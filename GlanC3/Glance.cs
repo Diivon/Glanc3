@@ -20,6 +20,8 @@ namespace Glc
 			public static string libDir;
 			///<summary>Directory, where Glance settings(.gcs) is</summary>
 			public static string settingsDir;
+			///<summary>Directory, where scripts(.gcsc) are</summary>
+			public static string scriptsDir;
 
 			///<summary>keys for c++ compiler</summary>
 			public static string compilerKeys;
@@ -115,7 +117,11 @@ namespace Glc
 			if (BuildSetting.isCompile)
 			{
 				foreach (var i in scenes[0].LayerList)
-					BuildSetting.complilerTargets.Add(Glance.BuildSetting.sourceDir + i.ClassName + ".cpp");
+				{
+					BuildSetting.complilerTargets.Add(Glance.BuildSetting.sourceDir + i.GetImplementationFileName());
+					foreach (var y in i._objects)
+						BuildSetting.complilerTargets.Add(Glance.BuildSetting.sourceDir + y.GetImplementationFileName());
+				}
 				Process cmd = new Process();
 				cmd.StartInfo = new ProcessStartInfo(@"cmd.exe");
 				cmd.StartInfo.RedirectStandardInput = true;
