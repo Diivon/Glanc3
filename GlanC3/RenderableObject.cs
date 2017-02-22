@@ -137,5 +137,13 @@ namespace Glc
 				result += '\n';
 			return result;
 		}
+		internal string GetCurrentSprite()
+		{
+			if (GraphComponent is Component.GraphicalComponent.Sprite)
+				return "return sprite;";
+			if (GraphComponent is Component.GraphicalComponent.Animation)
+				return "return " + Glance.NameSetting.AnimationName + ".getCurrentSprite();";
+			return "static_assert(false, \"in Glc.RenderableObject.GetCurrentSprite insufficient cases for GraphComponent\");";
+		}
 	}
 }

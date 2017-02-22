@@ -36,12 +36,18 @@ class Program {
 		var obj1 = new RenderableObject(new Vec2(50, 50));
 		obj1.ClassName = "Number1";
 		obj1.GraphComponent = new Glc.Component.GraphicalComponent.Sprite(@"resources\n\1.jpg");
-		obj1.Components.Add(new Glc.Component.Script("jaj.cpp"));
+		obj1.Components.Add(new Glc.Component.Script("num1.cpp"));
 
 		var obj2 = new RenderableObject(new Vec2(50, 100));
 		obj2.ClassName = "Number2";
-		obj2.GraphComponent = new Glc.Component.GraphicalComponent.Sprite(@"resources\n\2.jpg");
-		obj2.Components.Add(new Glc.Component.Script("kek.cpp"));
+		var anim = new Glc.Component.GraphicalComponent.Animation(Glc.Component.GraphicalComponent.AnimationType.PingPong);
+		anim.AddFrame(new SpriteFrame(@"resources\n\1.jpg", 500));
+		anim.AddFrame(new SpriteFrame(@"resources\n\2.jpg", 500));
+		anim.AddFrame(new SpriteFrame(@"resources\n\3.jpg", 500));
+		anim.AddFrame(new SpriteFrame(@"resources\n\4.jpg", 500));
+
+		obj2.GraphComponent = anim;
+		obj2.Components.Add(new Glc.Component.Script("num2.cpp"));
 
 		Glance.scenes.Add(scene);
 		scene.AddLayer(layer);

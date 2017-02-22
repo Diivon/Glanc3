@@ -116,6 +116,7 @@ namespace Glc
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO._scene.ClassName)
 									.Replace("#LayerName#", PO._layer.ClassName)
+									.Replace("#GetCurrentSprite#", PO.GetCurrentSprite())
 							);
 			}
 			internal static void writeLayer(FileStream declaration, FileStream implementation, Layer l)
@@ -135,7 +136,7 @@ namespace Glc
 
 					string render = "template<>\ninline void ::gc::Renderer::renderLayer(const " + l.ClassName + " & l){\n";
 					foreach (var i in l._objects)
-						render += "this->render(l.getObject<" + i.ClassName + ">().getSprite());\n";
+						render += "this->render(l.getObject<" + i.ClassName + ">().getCurrentSprite(), l.getObject<" + i.ClassName + ">().pos);\n";
 					render += '}';
 
 					WriteLnIn(declaration, templates["Class:Layer:Declaration"]
