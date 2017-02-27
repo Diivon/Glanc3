@@ -12,6 +12,7 @@ namespace Glc
 		{
 			_className = "Layer" + _count;
 			_objectName = "layerObject" + _count;
+			++_count;
 			_implementationFilePath = null;
 			_declarationFilePath = null;
 			_objects = new List<GameObject>();
@@ -26,6 +27,12 @@ namespace Glc
 		public void AddScript(Component.Script s)
 		{
 			_scripts.Add(s);
+		}
+		public void SetScene(Scene s)
+		{
+			_scene = s;
+			foreach (var i in _objects)
+				i.SetScene(s);
 		}
 
 		/// <summary>Name of this object for client, and name of this object class in cpp code</summary>

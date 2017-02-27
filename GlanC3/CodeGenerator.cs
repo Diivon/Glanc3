@@ -76,6 +76,7 @@ namespace Glc
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO._scene.ClassName)
+									.Replace("#LayerName#", PO._layer.ClassName)
 							);
 				WriteLnIn(implementation, templates["Class:PhysicalObject:Implementation"]
 									.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
@@ -87,6 +88,7 @@ namespace Glc
 									.Replace("#OnStart#", PO.GetComponentsOnStart())
 									.Replace("#ClassName#", PO.ClassName)
 									.Replace("#SceneName#", PO._scene.ClassName)
+									.Replace("#LayerName#", PO._layer.ClassName)
 							);
 			}
 			internal static void writeRenderableObject(FileStream declaration, FileStream implementation, RenderableObject PO)
@@ -136,7 +138,8 @@ namespace Glc
 
 					string render = "template<>\ninline void ::gc::Renderer::renderLayer(const " + l.ClassName + " & l){\n";
 					foreach (var i in l._objects)
-						render += "this->render(l.getObject<" + i.ClassName + ">().getCurrentSprite(), l.getObject<" + i.ClassName + ">().pos);\n";
+						if (i is RenderableObject)
+							render += "this->render(l.getObject<" + i.ClassName + ">().getCurrentSprite(), l.getObject<" + i.ClassName + ">().pos);\n";
 					render += '}';
 
 					WriteLnIn(declaration, templates["Class:Layer:Declaration"]
@@ -238,11 +241,6 @@ namespace Glc
 						SO.GenerateCode();
 					}
 				}
-				{//scenes
-					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].GetDeclarationFileName());
-					writeScene(Scfs, scenes[0]);
-					Scfs.Close();
-				}
 				{//layers	
 					foreach (var i in scenes)
 						foreach(var o in i.LayerList)
@@ -251,6 +249,11 @@ namespace Glc
 							var Lrcppfs = File.Create(BuildSetting.sourceDir + o.GetImplementationFileName());
 							writeLayer(Lrhfs, Lrcppfs, o);
 						}
+				}
+				{//scenes
+					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].GetDeclarationFileName());
+					writeScene(Scfs, scenes[0]);
+					Scfs.Close();
 				}
 				{//mainh
 					var mainHfs = File.Create(BuildSetting.sourceDir + "main.h");

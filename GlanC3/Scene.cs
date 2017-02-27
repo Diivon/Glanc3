@@ -34,14 +34,8 @@ namespace Glc
 		}
 		public void AddLayer(Layer go)
 		{
-			go._scene = this;
+			go.SetScene(this);
 			LayerList.Add(go);
-		}
-		public void AddLayersRange(Layer[] gos)
-		{
-			foreach (var i in gos)
-				i._scene = this;
-			LayerList.AddRange(gos);
 		}
 		public string GetDeclarationFileName()
 		{

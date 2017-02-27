@@ -30,8 +30,9 @@ class Program {
 
 		//-------------Client code starts here
 		var scene = new Scene();
-		var layer = new Layer();
-		layer.AddScript(new Glc.Component.Script(@"a.cpp"));
+		var layer1 = new Layer();
+		var layer2 = new Layer();
+		layer1.AddScript(new Glc.Component.Script(@"a.cpp"));
 
 		var obj1 = new RenderableObject(new Vec2(50, 50));
 		obj1.ClassName = "Number1";
@@ -45,14 +46,17 @@ class Program {
 		anim.AddFrame(new SpriteFrame(@"resources\n\2.jpg", 500));
 		anim.AddFrame(new SpriteFrame(@"resources\n\3.jpg", 500));
 		anim.AddFrame(new SpriteFrame(@"resources\n\4.jpg", 500));
-
 		obj2.GraphComponent = anim;
 		obj2.Components.Add(new Glc.Component.Script("num2.cpp"));
 
-		Glance.scenes.Add(scene);
-		scene.AddLayer(layer);
-		layer.AddObject(obj1);
-		layer.AddObject(obj2);
+		var phys1 = new PhysicalObject(new Vec2(-200, -200));
+		
+		layer1.AddObject(obj1);
+		layer1.AddObject(obj2);
+		layer2.AddObject(phys1);
+		scene.AddLayer(layer1);
+		scene.AddLayer(layer2);
+		Glance.AddScene(scene);
 		//-------------Client code ends here
 
 		Glance.Build();

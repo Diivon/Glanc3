@@ -9,6 +9,15 @@ namespace Glc
 {
 	public abstract class GameObject
 	{
+
+		public void SetLayer(Layer l)
+		{
+			_layer = l;
+		}
+		public void SetScene(Scene s)
+		{
+			_scene = s;
+		}
 		public string ClassName
 		{
 			set
@@ -19,7 +28,6 @@ namespace Glc
 			}
 			get { return _className; }
 		}
-
 		/// <summary>Components of this object</summary>
 		public List<Component.Component> Components;
 		/// <summary>Path to .h file of this Object</summary>
