@@ -28,8 +28,12 @@ namespace Glc
 			}
 			get { return _className; }
 		}
+		public void AddComponent(Component.Component c)
+		{
+			_components.Add(c);
+		}
 		/// <summary>Components of this object</summary>
-		public List<Component.Component> Components;
+		protected List<Component.Component> _components;
 		/// <summary>Path to .h file of this Object</summary>
 		public string ImplementationFilePath
 		{
@@ -74,7 +78,7 @@ namespace Glc
 		{
 			_implementationfilePath = null;
 			_declarationfilePath = null;
-			Components = new List<Component.Component>();
+			_components = new List<Component.Component>();
 		}
 		/// <summary>Generate .h and .cpp files for this object</summary>
 		internal abstract void GenerateCode();

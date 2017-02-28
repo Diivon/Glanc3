@@ -37,7 +37,9 @@ class Program {
 		var obj1 = new RenderableObject(new Vec2(50, 50));
 		obj1.ClassName = "Number1";
 		obj1.GraphComponent = new Glc.Component.GraphicalComponent.Sprite(@"resources\n\1.jpg");
-		obj1.Components.Add(new Glc.Component.Script("num1.cpp"));
+		obj1.AddComponent(new Glc.Component.Script("num1.cpp"));
+		obj1.AddComponent(new Glc.Component.Script("num1-detect-collide.cpp"));
+		obj1.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Rectangle, obj1.Pos, new Vec2(20, 20)));
 
 		var obj2 = new RenderableObject(new Vec2(50, 100));
 		obj2.ClassName = "Number2";
@@ -47,7 +49,8 @@ class Program {
 		anim.AddFrame(new SpriteFrame(@"resources\n\3.jpg", 500));
 		anim.AddFrame(new SpriteFrame(@"resources\n\4.jpg", 500));
 		obj2.GraphComponent = anim;
-		obj2.Components.Add(new Glc.Component.Script("num2.cpp"));
+		obj2.AddComponent(new Glc.Component.Script("num2.cpp"));
+		obj2.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Circle, obj2.Pos, new Vec2(20, 20)));
 
 		var phys1 = new PhysicalObject(new Vec2(-200, -200));
 		

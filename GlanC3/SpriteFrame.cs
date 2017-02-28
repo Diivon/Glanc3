@@ -23,7 +23,7 @@ namespace Glc
 		{
 			if (FilePath == null)
 				throw new Exception("In SpriteFrame.GetCppCtor(): FilePath != null assertion failed");
-			return "::gc::SpriteFrame(::gc::Sprite(" + Glance.ToCppString(FilePath) + "), " + Duration.ToString("0.00").Replace(',', '.') + "f)";
+			return "::gc::SpriteFrame(::gc::Sprite(" + Glance.ToCppString(FilePath) + "), " + Glance.floatToString(Duration) + ")";
 		}
     }
 }

@@ -46,6 +46,7 @@
     <Compile Include="Com_Animator.cs" />
     <Compile Include="Com_GraphicalComponent.cs" />
     <Compile Include="Com_Sound.cs" />
+    <Compile Include="Com_Collider.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Glance.cs" />
     <Compile Include="Layer.cs" />

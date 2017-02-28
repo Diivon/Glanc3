@@ -37,7 +37,7 @@ namespace Glc
 		internal override string GetComponentsVariables()
 		{
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 				result += Glance.GatherStringList(com.GetCppVariables(), '\n');
 			if (result != "")//if no variables, no need for '\n'
 				result += '\n';
@@ -46,7 +46,7 @@ namespace Glc
 		internal override string GetComponentsMethodsDeclaration()
 		{
 			List<string> result = new List<string>();
-			foreach (var i in Components)
+			foreach (var i in _components)
 				result.AddRange(i.GetCppMethodsDeclaration());
 			result = result.Distinct().ToList();
 			return Glance.GatherStringList(result, ";\n");
@@ -55,7 +55,7 @@ namespace Glc
 		{
 			string result = "";
 			var functions = new Dictionary<string, string>();
-			foreach (var i in Components)
+			foreach (var i in _components)
 				Glance.MergeDictionary(ref functions, i.GetCppMethodsImplementation());
 			foreach (var i in functions)
 				if(i.Key != "")
@@ -65,7 +65,7 @@ namespace Glc
 		internal override string GetComponentsConstructors()
 		{
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 			{
 				if (com.GetCppConstructor() == "")
 					continue;
@@ -76,7 +76,7 @@ namespace Glc
 		internal override string GetComponentsConstructorsBody()
 		{
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 			{
 				if (com.GetCppConstructorBody() == "")
 					continue;
@@ -89,7 +89,7 @@ namespace Glc
 		internal override string GetComponentsOnUpdate()
 		{
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 			{
 				if (com.GetCppOnUpdate() == "")
 					continue;
@@ -102,7 +102,7 @@ namespace Glc
 		internal override string GetComponentsOnStart()
 		{
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 			{
 				if (com.GetCppOnStart() == "")
 					continue;

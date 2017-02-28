@@ -39,7 +39,7 @@ namespace Glc
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 				result += Glance.GatherStringList(com.GetCppVariables(), ";\n");
 			result += Glance.GatherStringList(GraphComponent.GetCppVariables(), ";\n");
 			if (result != "")//if no variables, no need for '\n'
@@ -51,7 +51,7 @@ namespace Glc
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			List<string> result = new List<string>();
-			foreach (var i in Components)
+			foreach (var i in _components)
 				result.AddRange(i.GetCppMethodsDeclaration());
 			result.AddRange(GraphComponent.GetCppMethodsDeclaration());
 			result = result.Distinct().ToList();
@@ -66,7 +66,7 @@ namespace Glc
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
 			var functions = new Dictionary<string, string>();
-			foreach (var i in Components)
+			foreach (var i in _components)
 				Glance.MergeDictionary(ref functions, i.GetCppMethodsImplementation());
 			Glance.MergeDictionary(ref functions, GraphComponent.GetCppMethodsImplementation());
 			foreach (var i in functions)
@@ -79,7 +79,7 @@ namespace Glc
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 			{
 				if (com.GetCppConstructor() == "")
 					continue;
@@ -94,7 +94,7 @@ namespace Glc
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 			{
 				if (com.GetCppConstructorBody() == "")
 					continue;
@@ -110,7 +110,7 @@ namespace Glc
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 			{
 				if (com.GetCppOnUpdate() == "")
 					continue;
@@ -126,7 +126,7 @@ namespace Glc
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
-			foreach (var com in Components)
+			foreach (var com in _components)
 			{
 				if (com.GetCppOnStart() == "")
 					continue;

@@ -67,6 +67,9 @@ namespace Glc
 			public static string AnimatorName;
 			public static string AnimatorType;
 
+			public static string ColliderName;
+			public static string ColliderType;
+
 			public static string ScriptVariablesRegionName;
 			public static string ScriptMethodsRegionName;
 
@@ -80,6 +83,8 @@ namespace Glc
 				AnimationType = "animation_t";
 				AnimatorName = "animator";
 				AnimatorType = "animator_t";
+				ColliderName = "collider";
+				ColliderType = "collider_t";
 				ScriptVariablesRegionName = "variables:";
 				ScriptMethodsRegionName = "methods:";
 				ScriptOnUpdateSignature = "void onUpdate(const float & dt)";
@@ -254,6 +259,10 @@ namespace Glc
 		{
 			retType = GetRetTypeFromSignature(method);
 			anotherInfo = GetSignatureWithoutRetType(method);
+		}
+		internal static string floatToString(float d)
+		{
+			return d.ToString("0.00").Replace(',', '.') + "f";
 		}
 		static Glance()
 		{
