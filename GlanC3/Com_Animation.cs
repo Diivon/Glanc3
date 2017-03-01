@@ -52,9 +52,9 @@ namespace Glc.Component
 					result.Add(i, "");
 				return result;
 			}
-			internal override string GetCppConstructor()
+			internal override string[] GetCppConstructor()
 			{
-				return _GetProcessed(Glance.templates["Com:Animation:Constructor"]);
+				return _GetProcessed(Glance.templates["Com:Animation:Constructor"]).Split(',').gForEach(x => x.Trim());
 			}
 			internal override string GetCppConstructorBody()
 			{

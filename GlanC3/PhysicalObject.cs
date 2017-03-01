@@ -62,16 +62,12 @@ namespace Glc
 					result += Glance.GetRetTypeFromSignature(i.Key) + ' ' + ClassName + "::" + Glance.GetSignatureWithoutRetType(i.Key) + '{' + i.Value + '}' + '\n';
 			return result;
 		}
-		internal override string GetComponentsConstructors()
+		internal override string[] GetComponentsConstructors()
 		{
-			string result = "";
-			foreach (var com in _components)
-			{
-				if (com.GetCppConstructor() == "")
-					continue;
-				result += ", " + com.GetCppConstructor();
-			}
-			return result;
+			var result = new List<string>();
+			foreach (var i in _components)
+				result.AddRange(i.GetCppConstructor());
+			return result.ToArray();
 		}
 		internal override string GetComponentsConstructorsBody()
 		{

@@ -89,7 +89,7 @@ namespace Glc
 		/// <summary>return all components necessary Methods declaration</summary>
 		internal abstract string GetComponentsMethodsImplementation();
 		/// <summary>return all components necessary Constructors</summary>
-		internal abstract string GetComponentsConstructors();
+		internal abstract string[] GetComponentsConstructors();
 		/// <summary>return all components necessary Constructor code</summary>
 		internal abstract string GetComponentsConstructorsBody();
 		/// <summary>return all components necessary OnUpdate code</summary>

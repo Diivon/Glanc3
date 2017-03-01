@@ -10,18 +10,21 @@ namespace Glc.Component
 			Rectangle,
 			Circle
 		}
+		public Collider(Type t)
+		{
+			type = t;
+		}
+
 		public Vec2 pos;
 		public Vec2 size;
 		public Type type;
 		public float radius;
 
-		public Collider(Type t, Vec2 p, Vec2 s)
-		{
-			pos = p;
-			size = s;
-			type = t;
-		}
-		internal override string GetCppConstructor()
+		public Collider SetPosition(Vec2 p) { pos = p;  return this; }
+		public Collider SetSize(Vec2 s) { if (type == Type.Circle) throw new Exception("An attempt to SetSize to Circle Collider was found!"); size = s; return this; }
+		public Collider SetRadius(float r) { if (type == Type.Rectangle) throw new Exception("An attempt to SetRadius to Rectangle Collider was found!"); radius = r;  return this; }
+
+		internal override string[] GetCppConstructor()
 		{
 			switch (type)
 			{
@@ -30,12 +33,14 @@ namespace Glc.Component
 								.Replace("#ColliderName#", Glance.NameSetting.ColliderName)
 								.Replace("#Pos#", pos.GetCppCtor())
 								.Replace("#Size#", size.GetCppCtor())
+								.Split(',').gForEach(x => x.Trim())
 					;
 				case Type.Circle:
 					return Glance.templates["Com:Collider:Constructor"]
 								.Replace("#ColliderName#", Glance.NameSetting.ColliderName)
 								.Replace("#Pos#", pos.GetCppCtor())
 								.Replace("#Size#", Glance.floatToString(radius))
+								.Split(',').gForEach(x => x.Trim())
 					;
 				default:
 					throw new Exception("Glc.Component.Collider.GetCppConstructor has been hacked, param type is: " + type.ToString());
@@ -67,7 +72,7 @@ namespace Glc.Component
 		}
 		internal override string GetCppOnUpdate()
 		{
-			return Glance.templates["Com:Collider:OnUpdate"];
+			return Glance.templates["Com:Collider:OnUpdate"].Replace("#ColliderName#", Glance.NameSetting.ColliderName);
 		}
 		internal string TypeToCppType(Type t)
 		{

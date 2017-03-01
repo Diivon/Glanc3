@@ -18,7 +18,7 @@ namespace Glc.Component
 
 			/// <summary>return constructors for component variables
 			/// as Initializaton List(which goes after colon)</summary>
-			internal abstract string GetCppConstructor();
+			internal abstract string[] GetCppConstructor();
 			/// <summary>return body for constructor</summary>
 			internal abstract string GetCppConstructorBody();
 			/// <summary>return code, that must be in onUpdate()</summary>

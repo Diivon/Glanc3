@@ -25,9 +25,9 @@ namespace Glc.Component
 		{
 			return new Dictionary<string, string>();
 		}
-		internal override string GetCppConstructor()
+		internal override string[] GetCppConstructor()
 		{
-			return Glance.templates["Com:Sound:Constructor"].Replace("#FileName#", Glance.ToCppString(FileName));
+			return Glance.templates["Com:Sound:Constructor"].Replace("#FileName#", Glance.ToCppString(FileName)).Split(',').gForEach(x => x.Trim());
 		}
 		internal override string GetCppConstructorBody()
 		{

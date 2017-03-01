@@ -25,7 +25,7 @@ class Program {
 
 		Glance.BuildSetting.isClearSrcDir = true;
 		Glance.BuildSetting.isGenerateCode = true;
-		Glance.BuildSetting.isCompile = true;
+		Glance.BuildSetting.isRecompile = true;
 		Glance.BuildSetting.isRunAppAfterCompiling = true;
 
 		//-------------Client code starts here
@@ -39,7 +39,7 @@ class Program {
 		obj1.GraphComponent = new Glc.Component.GraphicalComponent.Sprite(@"resources\n\1.jpg");
 		obj1.AddComponent(new Glc.Component.Script("num1.cpp"));
 		obj1.AddComponent(new Glc.Component.Script("num1-detect-collide.cpp"));
-		obj1.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Rectangle, obj1.Pos, new Vec2(20, 20)));
+		obj1.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Circle).SetPosition(obj1.Pos).SetRadius(27));
 
 		var obj2 = new RenderableObject(new Vec2(50, 100));
 		obj2.ClassName = "Number2";
@@ -50,7 +50,7 @@ class Program {
 		anim.AddFrame(new SpriteFrame(@"resources\n\4.jpg", 500));
 		obj2.GraphComponent = anim;
 		obj2.AddComponent(new Glc.Component.Script("num2.cpp"));
-		obj2.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Circle, obj2.Pos, new Vec2(20, 20)));
+		obj2.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Circle).SetPosition(obj2.Pos).SetRadius(27));
 
 		var phys1 = new PhysicalObject(new Vec2(-200, -200));
 		
@@ -61,9 +61,9 @@ class Program {
 		scene.AddLayer(layer2);
 		Glance.AddScene(scene);
 		//-------------Client code ends here
-
 		Glance.Build();
 		GC.Collect();
+
 		Console.ReadKey();
     }
 }

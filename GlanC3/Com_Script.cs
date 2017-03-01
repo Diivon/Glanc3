@@ -36,21 +36,21 @@ namespace Glc.Component
 		{
 			return _data.Variables;
 		}
-		internal override string GetCppConstructor()
+		internal override string[] GetCppConstructor()
 		{
-			return "";
+			return _data.Constructors;
 		}
 		internal override string GetCppConstructorBody()
 		{
-			return "";
+			return _data.ConstructorBody;
 		}
 		internal override string GetCppOnUpdate()
 		{
-			return _data.onUpdate;
+			return _data.OnUpdate;
 		}
 		internal override string GetCppOnStart()
 		{
-			return _data.onStart;
+			return _data.OnStart;
 		}
 		internal override string[] GetCppMethodsDeclaration()
 		{
@@ -63,6 +63,14 @@ namespace Glc.Component
 		private _Data _data;
 		private class _Data
 		{
+			enum Region
+			{
+				Variables,
+				Methods,
+				Constructor,
+				ConstructorBody,
+				Undefined
+			}
 			public _Data(Script s)
 			{
 				_isInitializated = false;
@@ -83,13 +91,14 @@ namespace Glc.Component
 					_variables = value;
 				}
 			}
-			public string onUpdate { get; private set; }
-			public string onStart { get; private set; }
+			public string OnUpdate { get; private set; }
+			public string OnStart { get; private set; }
 			public string[] MethodsDeclarations { get; private set; }
 			public Dictionary<string, string> MethodsImplementations { get; private set; }
+			public string[] Constructors { get; private set; }
+			public string ConstructorBody { get; private set; }
 
 			private string[] _variables;
-
 			private Script _owner;
 			private bool _isInitializated;
 			private void _Init()
@@ -98,11 +107,12 @@ namespace Glc.Component
 					return;
 				//
 				var strings = File.ReadAllLines(_owner.FileName);
-				bool isInsideVariablesRegion = false;
-				bool isInsideMethodsRegion = false;
 				bool isInsideMethod = false;
+				Region currentRegion = Region.Undefined;
 				byte tabs = 0; ;
 				List<string> variables = new List<string>();
+				List<string> constructors = new List<string>();
+				string constructorBody = "";
 				string currentMethodSignature = null;
 
 				foreach (var i in strings)
@@ -115,27 +125,45 @@ namespace Glc.Component
 							continue;
 					if (str.Contains(Glance.NameSetting.ScriptVariablesRegionName))
 					{
-						isInsideVariablesRegion = true;
-						isInsideMethodsRegion = false;
+						currentRegion = Region.Variables;
 						continue;
 					}
 					if (str.Contains(Glance.NameSetting.ScriptMethodsRegionName))
 					{
-						isInsideMethodsRegion = true;
-						isInsideVariablesRegion = false;
-						continue;//any else words in this line are illegal, if you find some in it, please call 911
+						currentRegion = Region.Methods;
+						continue;
 					}
 
-					if (isInsideVariablesRegion)
+					if (str.Contains(Glance.NameSetting.ScriptConstructorsRegionName))
+					{
+						currentRegion = Region.Constructor;
+						continue;
+					}
+					if (str.Contains(Glance.NameSetting.ScriptConstructorBodyRegionName))
+					{
+						currentRegion = Region.ConstructorBody;
+						continue;
+					}
+
+					if (currentRegion == Region.Variables)
 						variables.Add(str);
 
-					if (isInsideMethodsRegion)
+					if (currentRegion == Region.Constructor)
+						constructors.AddRange(str.Split(',').gForEach(x => x.Trim()));//add Trimmed array
+
+					if (currentRegion == Region.ConstructorBody)
+						constructorBody += str;
+
+					if (currentRegion == Region.Methods)
 					{
-						if (!isInsideMethod)//method after method, without any shit
+						if (!isInsideMethod)
 						{
+							//if we are not inside of method, then we are at signature of this method
+							if (Glance.getLastChar(str) != '{')
+								throw new Exception("'{' not at the end of line with method signature, signature is: " + str);
 							currentMethodSignature = str.Substring(0, str.Length - 1);//cut '{'
-							isInsideMethod = true;
 							++tabs;
+							isInsideMethod = true;
 							if (MethodsImplementations.ContainsKey(currentMethodSignature))
 								MethodsImplementations[currentMethodSignature] += "";
 							else
@@ -157,14 +185,14 @@ namespace Glc.Component
 								MethodsImplementations[currentMethodSignature] += str + '\n';
 							else
 								MethodsImplementations.Add(currentMethodSignature, str + '\n');
-
 						}
 					}
 				}//foreach
-
+				Constructors = constructors.ToArray();
+				ConstructorBody = constructorBody;
 				Variables = variables.ToArray();
-				onUpdate = MethodsImplementations[Glance.NameSetting.ScriptOnUpdateSignature];
-				onStart = MethodsImplementations[Glance.NameSetting.ScriptOnStartSignature];
+				OnUpdate = MethodsImplementations[Glance.NameSetting.ScriptOnUpdateSignature];
+				OnStart = MethodsImplementations[Glance.NameSetting.ScriptOnStartSignature];
 
 				MethodsImplementations.Remove(Glance.NameSetting.ScriptOnStartSignature);
 				MethodsImplementations.Remove(Glance.NameSetting.ScriptOnUpdateSignature);

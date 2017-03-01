@@ -74,20 +74,14 @@ namespace Glc
 					result += Glance.GetRetTypeFromSignature(i.Key) + ' ' + ClassName + "::" + Glance.GetSignatureWithoutRetType(i.Key) + '{' + i.Value + '}' + '\n';
 			return result;
 		}
-		internal override string GetComponentsConstructors()
+		internal override string[] GetComponentsConstructors()
 		{
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
-			string result = "";
-			foreach (var com in _components)
-			{
-				if (com.GetCppConstructor() == "")
-					continue;
-				result += ", " + com.GetCppConstructor();
-			}
-			if (GraphComponent.GetCppConstructor() != "")
-				result += ", " + GraphComponent.GetCppConstructor();
-			return result;
+			List<string> result = new List<string>();
+			foreach (var i in _components)
+				result.AddRange(i.GetCppConstructor());
+			return result.ToArray();
 		}
 		internal override string GetComponentsConstructorsBody()
 		{

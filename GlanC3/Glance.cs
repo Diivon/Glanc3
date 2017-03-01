@@ -34,7 +34,7 @@ namespace Glc
 			///<remarks>BE CAREFULL!!!</remarks>
 			public static bool isClearSrcDir;
 			///<summary>is Glance will recompile sources when Buid() is called</summary>
-			public static bool isCompile;
+			public static bool isRecompile;
 			///<summary>is Glance will run application after compiling</summary>
 			public static bool isRunAppAfterCompiling;
 			///<summary>name for .exe file of launch-ready application</summary>
@@ -72,6 +72,8 @@ namespace Glc
 
 			public static string ScriptVariablesRegionName;
 			public static string ScriptMethodsRegionName;
+			public static string ScriptConstructorsRegionName;
+			public static string ScriptConstructorBodyRegionName;
 
 			public static string ScriptOnUpdateSignature;
 			public static string ScriptOnStartSignature;
@@ -87,12 +89,14 @@ namespace Glc
 				ColliderType = "collider_t";
 				ScriptVariablesRegionName = "variables:";
 				ScriptMethodsRegionName = "methods:";
+				ScriptConstructorsRegionName = "constructors:";
+				ScriptConstructorBodyRegionName = "constructor_body:";
 				ScriptOnUpdateSignature = "void onUpdate(const float & dt)";
 				ScriptOnStartSignature = "void onStart()";
 			}
 		}
 		/// <summary>Contain all scene of the game</summary>
-		public static List<Scene> scenes;
+		private static List<Scene> scenes;
 		public static void AddScene(Scene s)
 		{
 			scenes.Add(s);
@@ -119,7 +123,7 @@ namespace Glc
 				File.Delete(BuildSetting.outputDir + BuildSetting.exeName);
 			}
 
-			if (BuildSetting.isCompile)
+			if (BuildSetting.isRecompile)
 			{
 				foreach (var i in scenes[0].LayerList)
 				{
@@ -190,33 +194,41 @@ namespace Glc
 			if (dict.ContainsKey(""))
 				dict.Remove("");
 		}
-		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
+		/// <summary>transform ({"foo", "bar"}, "!") to "foo!bar"</summary>
 		internal static string GatherStringList(List<string> list, string connector)
 		{
-			string result = "";
-			foreach (string str in list)
-				result += str + connector;
-			return result;
+			return GatherStringList(list.ToArray(), connector);
 		}
 		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
 		internal static string GatherStringList(List<string> list, char connector)
 		{
 			return GatherStringList(list, connector.ToString());
 		}
+		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
 		internal static string GatherStringList(string[] list, char connector)
 		{
 			string result = "";
-			foreach (var i in list)
-				result += i + connector;
+			for (var i = 0; i < list.Length - 2; ++i)
+				result += list[i] + connector;
+			result += list[list.Length - 1];
 			return result;
 		}
+		/// <summary>transform ({"foo", "bar"}, "!") to "foo!bar"</summary>
 		internal static string GatherStringList(string[] list, string connector)
 		{
+			//string result = "";
+			//foreach (var i in list)
+			//	result += i + connector;
+			//return result;
+			if (list.Length == 0)
+				return "";
 			string result = "";
-			foreach (var i in list)
-				result += i + connector;
+			for (var i = 0; i < list.Length - 2; ++i)
+				result += list[i] + connector;
+			result += list[list.Length - 1];
 			return result;
 		}
+
 		internal static string ToCppString(string s)
 		{
 			return '"' + s.Replace(@"\", @"\\") + '"';
@@ -263,6 +275,52 @@ namespace Glc
 		internal static string floatToString(float d)
 		{
 			return d.ToString("0.00").Replace(',', '.') + "f";
+		}
+		internal static int getIndexOfPairedBracket(string line, int bracketPos)
+		{
+			var result = -1;
+			var nestingLevel = -1;
+			switch(line[bracketPos])
+			{
+				case '(':
+					for (var i = bracketPos; i < line.Length; ++i)
+						if (line[i] == '(')
+							++nestingLevel;
+						else if (line[i] == ')')
+						{
+							if (nestingLevel == 0)
+							{ result = i; break; }
+							else --nestingLevel;
+						}
+					break;
+				case ')':
+					for (var i = bracketPos; i > 0; --i)
+						if (line[i] == ')')
+							++nestingLevel;
+						else if (line[i] == '(')
+						{
+							if (nestingLevel == 0)
+							{ result = i; break; }
+							else --nestingLevel;
+						}
+					break;
+				default:
+					throw new Exception("Exception" + line[bracketPos].ToString() + '!');
+			}
+			if (result == -1)
+				throw new Exception("No Paired Bracket in line \"" + line + '"');
+			return result;
+		}
+		internal static char getLastChar(string line)
+		{
+			return line[line.Length - 1];
+		}
+		internal delegate void Del(string i);
+		internal static string[] gForEach(this string[] list, Del fun)
+		{
+			foreach (var i in list)
+				fun(i);
+			return list;
 		}
 		static Glance()
 		{

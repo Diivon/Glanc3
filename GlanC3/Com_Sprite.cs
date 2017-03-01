@@ -42,9 +42,10 @@ namespace Glc.Component
 					result.Add(i, "");
 				return result;
 			}
-			internal override string GetCppConstructor()
+			internal override string[] GetCppConstructor()
 			{
-				return Glance.templates["Com:Sprite:Constructor"].Replace("#FileName#", Glance.ToCppString(FileName)).Trim();
+				return Glance.templates["Com:Sprite:Constructor"].Replace("#FileName#", Glance.ToCppString(FileName))
+							.Trim().Split(',').gForEach(x => x.Trim());
 			}
 			internal override string GetCppConstructorBody()
 			{
