@@ -50,18 +50,30 @@ namespace Glc.Component
 		{
 			return Glance.templates["Com:Collider:ConstructorBody"];
 		}
-		internal override string[] GetCppMethodsDeclaration()
+		internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppMethodsDeclaration()
 		{
-			return Glance.templates["Com:Collider:Methods"].Split(';');
+            var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+            var methods = Glance.templates["Com:Collider:Methods"].Split(';').gForEach(x => x.Trim());
+            result.Add(Glance.FieldsAccessType.Public, methods);
+            return result;
 		}
-		internal override string[] GetCppVariables()
+		internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
 		{
+            /*
 			return Glance.templates["Com:Collider:Vars"]
 								.Replace("#ColliderType#", TypeToCppType(type))
 								.Replace("#ColliderTypeName#", Glance.NameSetting.ColliderType)
 								.Replace("#ColliderName#", Glance.NameSetting.ColliderName)
 				.Split(';');
-		}
+            */
+            var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+            var variables = Glance.templates["Com:Collider:Vars"]
+                                .Replace("#ColliderType#", TypeToCppType(type))
+                                .Replace("#ColliderTypeName#", Glance.NameSetting.ColliderType)
+                                .Replace("#ColliderName#", Glance.NameSetting.ColliderName).Split(';').gForEach(x => x.Trim());
+            result.Add(Glance.FieldsAccessType.Public, variables);
+            return result;
+        }
 		internal override Dictionary<string, string> GetCppMethodsImplementation()
 		{
 			return new Dictionary<string, string>();

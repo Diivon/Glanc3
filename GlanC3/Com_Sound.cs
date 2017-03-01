@@ -13,13 +13,19 @@ namespace Glc.Component
 		{
 			FileName = filePath;
 		}
-		internal override string[] GetCppVariables()
+		internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
 		{
-			return Glance.templates["Com:Sound:Vars"].Split(';');
+            var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+            result.Add(Glance.FieldsAccessType.Public, Glance.templates["Com:Sound:Vars"].Split(';').gForEach(x => x.Trim()));
+            return result;
 		}
-		internal override string[] GetCppMethodsDeclaration()
+		internal override Dictionary<Glance.FieldsAccessType, string> GetCppMethodsDeclaration()
 		{
-			return Glance.templates["Com:Sound:Methods"].Split(';');
+            var result = new Dictionary<Glance.FieldsAccessType, string>();
+            var methods = Glance.templates["Com:Sound:Methods"].Split(';').gForEach(x => x.Trim());
+            foreach (var i in methods)
+                result.Add(Glance.FieldsAccessType.Public, i);
+            return result;
 		}
 		internal override Dictionary<string, string> GetCppMethodsImplementation()
 		{

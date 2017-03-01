@@ -11,36 +11,26 @@ namespace Glc.Component
 		public class Sprite : GraphicalComponent
 		{
 			string FileName;
-			/// <summary></summary>
-			/// <param name="fn">File name of picture</param>
 			public Sprite(string fn)
 			{
 				FileName = fn;
 			}
-			internal override string[] GetCppVariables()
+			internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
 			{
-				List<string> a = new List<string>();
-				a.AddRange(Glance.templates["Com:Sprite:Vars"].Split(';'));
-				string[] result = new string[a.Count];
-				for (int i = 0; i < a.Count; ++i)
-					result[i] = a[i].Trim();
-				return result;
-			}
-			internal override string[] GetCppMethodsDeclaration()
+                var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+                result.Add(Glance.FieldsAccessType.Public, Glance.templates["Com:Sprite:Vars"].Split(';').gForEach(x => x.Trim()));
+                return result;
+            }
+			internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppMethodsDeclaration()
 			{
-				List<string> a = new List<string>();
-				a.AddRange(Glance.templates["Com:Sprite:Methods"].Split(';'));
-				string[] result = new string[a.Count];
-				for (int i = 0; i < a.Count; ++i)
-					result[i] = a[i].Trim();
-				return result;
-			}
+                var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+                var methods = Glance.templates["Com:Sprite:Methods"].Split(';').gForEach(x => x.Trim());
+                result.Add(Glance.FieldsAccessType.Public, methods);
+                return result;
+            }
 			internal override Dictionary<string, string> GetCppMethodsImplementation()
 			{
-				var result = new Dictionary<string, string>();
-				foreach (var i in GetCppMethodsDeclaration())
-					result.Add(i, "");
-				return result;
+                //выкинуть нахуй инфу про доступ, заполнить вэлью пустыми строками
 			}
 			internal override string[] GetCppConstructor()
 			{

@@ -229,6 +229,13 @@ namespace Glc
 			return result;
 		}
 
+        internal enum FieldsAccessType
+        {
+            Public,
+            Protected,
+            Private,
+            Undefined
+        }
 		internal static string ToCppString(string s)
 		{
 			return '"' + s.Replace(@"\", @"\\") + '"';

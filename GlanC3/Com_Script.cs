@@ -32,7 +32,7 @@ namespace Glc.Component
 			FileName = Glance.BuildSetting.scriptsDir + filename;
 			_data = new _Data(this);
 		}
-		internal override string[] GetCppVariables()
+		internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
 		{
 			return _data.Variables;
 		}

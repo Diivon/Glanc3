@@ -27,29 +27,28 @@ namespace Glc.Component
 			{
 				Frames.Add(new SpriteFrame(path, dur));
 			}
-			internal override string[] GetCppVariables()
+
+
+			internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
 			{
-				List<string> a = new List<string>();
-				a.AddRange(_GetProcessed(Glance.templates["Com:Animation:Vars"]).Split(';'));
-				string[] result = new string[a.Count];
-				for (int i = 0; i < a.Count; ++i)
-					result[i] = a[i].Trim();
-				return result;
+                var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+                var adding = _GetProcessed(Glance.templates["Com:Animation:Vars"]).Split(';').gForEach(x => x.Trim());
+                result.Add(Glance.FieldsAccessType.Public, adding);
+                return result;
 			}
-			internal override string[] GetCppMethodsDeclaration()
+			internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppMethodsDeclaration()
 			{
-				List<string> a = new List<string>();
-				a.AddRange(_GetProcessed(Glance.templates["Com:Animation:Methods"]).Split(';'));
-				string[] result = new string[a.Count];
-				for (int i = 0; i < a.Count; ++i)
-					result[i] = a[i].Trim();
-				return result;
-			}
+                var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+                result.Add(Glance.FieldsAccessType.Public,
+                            _GetProcessed(Glance.templates["Com:Animation:Methods"]).Split().gForEach(x => x.Trim())
+                           );
+                return result;
+            }
 			internal override Dictionary<string, string> GetCppMethodsImplementation()
 			{
 				var result = new Dictionary<string, string>();
 				foreach (var i in GetCppMethodsDeclaration())
-					result.Add(i, "");
+					result.Add(i.Value, "");
 				return result;
 			}
 			internal override string[] GetCppConstructor()
