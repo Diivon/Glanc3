@@ -13,27 +13,28 @@ namespace Glc.Component
 		{
 			FileName = filePath;
 		}
-		internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
+		internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppVariables()
 		{
-            var result = new Dictionary<Glance.FieldsAccessType, string[]>();
-            result.Add(Glance.FieldsAccessType.Public, Glance.templates["Com:Sound:Vars"].Split(';').gForEach(x => x.Trim()));
+            var result = new Dictionary<Glance.FieldsAccessType, List<string>>();
+			var variables = Glance.templates["Com:Sound:Vars"].Split(';').gForEach(x => x.Trim());
+			result.Add(Glance.FieldsAccessType.Public, variables.ToList());
             return result;
 		}
-		internal override Dictionary<Glance.FieldsAccessType, string> GetCppMethodsDeclaration()
+		internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppMethodsDeclaration()
 		{
-            var result = new Dictionary<Glance.FieldsAccessType, string>();
+            var result = new Dictionary<Glance.FieldsAccessType, List<string>>();
             var methods = Glance.templates["Com:Sound:Methods"].Split(';').gForEach(x => x.Trim());
-            foreach (var i in methods)
-                result.Add(Glance.FieldsAccessType.Public, i);
+            result.Add(Glance.FieldsAccessType.Public, methods.ToList());
             return result;
 		}
 		internal override Dictionary<string, string> GetCppMethodsImplementation()
 		{
 			return new Dictionary<string, string>();
 		}
-		internal override string[] GetCppConstructor()
+		internal override List<string> GetCppConstructor()
 		{
-			return Glance.templates["Com:Sound:Constructor"].Replace("#FileName#", Glance.ToCppString(FileName)).Split(',').gForEach(x => x.Trim());
+			return Glance.templates["Com:Sound:Constructor"].
+				Replace("#FileName#", Glance.ToCppString(FileName)).Split(',').gForEach(x => x.Trim()).ToList();
 		}
 		internal override string GetCppConstructorBody()
 		{

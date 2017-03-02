@@ -103,6 +103,8 @@ namespace Glc
 		}
 		public static void Build()
 		{
+			if (scenes.Count == 0)
+				return;
 			Init();
 			if (BuildSetting.isGenerateCode)
 			{
@@ -125,11 +127,14 @@ namespace Glc
 
 			if (BuildSetting.isRecompile)
 			{
-				foreach (var i in scenes[0].LayerList)
+				foreach (var scene in scenes)
 				{
-					BuildSetting.complilerTargets.Add(Glance.BuildSetting.sourceDir + i.GetImplementationFileName());
-					foreach (var y in i._objects)
-						BuildSetting.complilerTargets.Add(Glance.BuildSetting.sourceDir + y.GetImplementationFileName());
+					foreach (var layer in scene.LayerList)
+					{
+						BuildSetting.complilerTargets.Add(BuildSetting.sourceDir + layer.GetImplementationFileName());
+						foreach (var obj in layer._objects)
+							BuildSetting.complilerTargets.Add(BuildSetting.sourceDir + obj.GetImplementationFileName());
+					}
 				}
 				Process cmd = new Process();
 				cmd.StartInfo = new ProcessStartInfo(@"cmd.exe");
@@ -137,7 +142,7 @@ namespace Glc
 				cmd.StartInfo.UseShellExecute = false;
 				cmd.Start();
 				cmd.StandardInput.WriteLine(BuildSetting.settingsDir + Glance.settings["B:EnvVarsConfig"]);
-				cmd.StandardInput.WriteLine(Glance.CreateApplication());
+				cmd.StandardInput.WriteLine(CreateApplication());
 				if (BuildSetting.isRunAppAfterCompiling)
 				{
 					cmd.StandardInput.WriteLine("D:");
@@ -168,11 +173,11 @@ namespace Glc
                 Directory.CreateDirectory(BuildSetting.sourceDir);
 			if (File.Exists(BuildSetting.outputDir + BuildSetting.exeName))
 				File.Delete(BuildSetting.outputDir + BuildSetting.exeName);
-			return "cl.exe " + BuildSetting.compilerKeys + ' ' + @"/Fe" + BuildSetting.outputDir + ' ' + BuildSetting.sourceDir + @"main.cpp " + GatherStringList(BuildSetting.complilerTargets, ' ') + " /link" + ' ' + BuildSetting.linkerKeys;
+			return "cl.exe " + BuildSetting.compilerKeys + ' ' + @"/Fe" + BuildSetting.outputDir + ' ' + BuildSetting.sourceDir + @"main.cpp " + GatherStringList(BuildSetting.complilerTargets, " ") + " /link" + ' ' + BuildSetting.linkerKeys;
 		}
 
 		///<summary>parse Glance settings(.gcs) file</summary>
-		internal static void ParseGCS(string[] strings, ref System.Collections.Generic.Dictionary<string, string> dict)
+		internal static void ParseGCS(string[] strings, ref Dictionary<string, string> dict)
 		{
 			string mkey = "";
 			string mvalue = "";
@@ -195,35 +200,21 @@ namespace Glc
 				dict.Remove("");
 		}
 		/// <summary>transform ({"foo", "bar"}, "!") to "foo!bar"</summary>
-		internal static string GatherStringList(List<string> list, string connector)
+		public static string GatherStringList(List<string> list, string connector)
 		{
 			return GatherStringList(list.ToArray(), connector);
 		}
-		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
-		internal static string GatherStringList(List<string> list, char connector)
-		{
-			return GatherStringList(list, connector.ToString());
-		}
-		/// <summary>transform ({"foo", "bar"}, '!') to "foo!bar"</summary>
-		internal static string GatherStringList(string[] list, char connector)
-		{
-			string result = "";
-			for (var i = 0; i < list.Length - 2; ++i)
-				result += list[i] + connector;
-			result += list[list.Length - 1];
-			return result;
-		}
 		/// <summary>transform ({"foo", "bar"}, "!") to "foo!bar"</summary>
-		internal static string GatherStringList(string[] list, string connector)
+		public static string GatherStringList(string[] list, string connector)
 		{
-			//string result = "";
-			//foreach (var i in list)
-			//	result += i + connector;
-			//return result;
 			if (list.Length == 0)
 				return "";
+			if (list.Length == 1)
+				return list[0];
+			if (list.Length == 2)
+				return list[0] + connector + list[1];
 			string result = "";
-			for (var i = 0; i < list.Length - 2; ++i)
+			for (var i = 0; i < list.Length - 1; ++i)
 				result += list[i] + connector;
 			result += list[list.Length - 1];
 			return result;
@@ -328,6 +319,47 @@ namespace Glc
 			foreach (var i in list)
 				fun(i);
 			return list;
+		}
+		internal static List<string> gForEach(this List<string> list, Del fun)
+		{
+			foreach (var i in list)
+				fun(i);
+			return list;
+		}
+		internal static Dictionary<FieldsAccessType, List<string>> gAddOrMerge(this Dictionary<Glance.FieldsAccessType , List<string>> dic, FieldsAccessType t, List<string> list)
+		{
+			if (dic.ContainsKey(t))
+				dic[t].AddRange(list);
+			else
+				dic.Add(t, list);
+			return dic;
+		}
+		internal static Dictionary<FieldsAccessType, List<string>> gAddOrMerge(this Dictionary<Glance.FieldsAccessType, List<string>> dic, Dictionary<Glance.FieldsAccessType, List<string>> another)
+		{
+			foreach (var i in another)
+				if (dic.ContainsKey(i.Key))
+					dic[i.Key].AddRange(i.Value);
+				else dic.gAddOrMerge(i.Key, i.Value);
+			return dic;
+		}
+		internal static List<string> gGetByKeyOrDefault(this Dictionary<Glance.FieldsAccessType, List<string>> dic, Glance.FieldsAccessType t)
+		{
+			if (dic.ContainsKey(t))
+				return dic[t];
+			else return new List<string>();
+		}
+		internal static Dictionary<FieldsAccessType, List<string>> gRemoveWhiteSpace(this Dictionary<FieldsAccessType, List<string>> dic)
+		{
+			var result = new Dictionary<FieldsAccessType, List<string>>();
+			foreach (var i in dic.gGetByKeyOrDefault(FieldsAccessType.Public))
+				if (i.Trim('\n', ' ', '\t') == "")
+					continue;
+				else result.gAddOrMerge(FieldsAccessType.Public, new List<string> { i.Trim() });
+			foreach (var i in dic.gGetByKeyOrDefault(FieldsAccessType.Private))
+				if (i.Trim('\n', ' ', '\t') == "")
+					continue;
+				else result.gAddOrMerge(FieldsAccessType.Private, new List<string> { i.Trim() });
+			return result;
 		}
 		static Glance()
 		{

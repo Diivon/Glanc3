@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Glc.Component
 {
@@ -29,31 +27,31 @@ namespace Glc.Component
 			}
 
 
-			internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
+			internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppVariables()
 			{
-                var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+                var result = new Dictionary<Glance.FieldsAccessType, List<string>>();
                 var adding = _GetProcessed(Glance.templates["Com:Animation:Vars"]).Split(';').gForEach(x => x.Trim());
-                result.Add(Glance.FieldsAccessType.Public, adding);
+                result.Add(Glance.FieldsAccessType.Public, adding.ToList());
                 return result;
 			}
-			internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppMethodsDeclaration()
+			internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppMethodsDeclaration()
 			{
-                var result = new Dictionary<Glance.FieldsAccessType, string[]>();
-                result.Add(Glance.FieldsAccessType.Public,
-                            _GetProcessed(Glance.templates["Com:Animation:Methods"]).Split().gForEach(x => x.Trim())
-                           );
+                var result = new Dictionary<Glance.FieldsAccessType, List<string>>();
+				var methods = _GetProcessed(Glance.templates["Com:Animation:Methods"]).Split(';').gForEach(x => x.Trim());
+				result.Add(Glance.FieldsAccessType.Public, methods.ToList());
                 return result;
             }
 			internal override Dictionary<string, string> GetCppMethodsImplementation()
 			{
 				var result = new Dictionary<string, string>();
-				foreach (var i in GetCppMethodsDeclaration())
-					result.Add(i.Value, "");
+				foreach (var i in GetCppMethodsDeclaration())//{ {Public, {"void a()"}}, {Private, {"int b(int)"}} }
+					foreach (var u in i.Value)	//{ "void a()", "int b(int)" }
+						result.Add(u, "");		//{ {"void a()", ""}, {"int b()", ""} }
 				return result;
 			}
-			internal override string[] GetCppConstructor()
+			internal override List<string> GetCppConstructor()
 			{
-				return _GetProcessed(Glance.templates["Com:Animation:Constructor"]).Split(',').gForEach(x => x.Trim());
+				return _GetProcessed(Glance.templates["Com:Animation:Constructor"]).Split(',').gForEach(x => x.Trim()).ToList();
 			}
 			internal override string GetCppConstructorBody()
 			{

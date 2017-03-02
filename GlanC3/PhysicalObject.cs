@@ -37,19 +37,29 @@ namespace Glc
 		internal override string GetComponentsVariables()
 		{
 			string result = "";
-			foreach (var com in _components)
-				result += Glance.GatherStringList(com.GetCppVariables(), '\n');
-			if (result != "")//if no variables, no need for '\n'
-				result += '\n';
+			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
+			foreach (var i in _components)
+				dict.gAddOrMerge(i.GetCppVariables());
+			result += "public:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Public), ";\n");
+			result += "private:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Private), ";\n");
+			//do not distinct array, if in components two same variables, it must cause compiling error
 			return result;
 		}
 		internal override string GetComponentsMethodsDeclaration()
 		{
-			List<string> result = new List<string>();
+			string result = "";
+			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
 			foreach (var i in _components)
-				result.AddRange(i.GetCppMethodsDeclaration());
-			result = result.Distinct().ToList();
-			return Glance.GatherStringList(result, ";\n");
+				dict.gAddOrMerge(i.GetCppMethodsDeclaration());
+			//distinct array
+			result += "public:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Public).Distinct().ToList(), ";\n");
+			result += "private:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Private).Distinct().ToList(), ";\n");
+			//some methods may repeat in different components, it's normal
+			return result;
 		}
 		internal override string GetComponentsMethodsImplementation()
 		{

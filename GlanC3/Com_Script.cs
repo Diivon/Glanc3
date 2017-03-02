@@ -32,11 +32,11 @@ namespace Glc.Component
 			FileName = Glance.BuildSetting.scriptsDir + filename;
 			_data = new _Data(this);
 		}
-		internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
+		internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppVariables()
 		{
 			return _data.Variables;
 		}
-		internal override string[] GetCppConstructor()
+		internal override List<string> GetCppConstructor()
 		{
 			return _data.Constructors;
 		}
@@ -52,7 +52,7 @@ namespace Glc.Component
 		{
 			return _data.OnStart;
 		}
-		internal override string[] GetCppMethodsDeclaration()
+		internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppMethodsDeclaration()
 		{
 			return _data.MethodsDeclarations;
 		}
@@ -78,42 +78,35 @@ namespace Glc.Component
 				MethodsImplementations = new Dictionary<string, string>();
 				MethodsImplementations.Add(Glance.NameSetting.ScriptOnStartSignature, "");//costili
 				MethodsImplementations.Add(Glance.NameSetting.ScriptOnUpdateSignature, "");//KOCTblJlU
+				MethodsDeclarations = new Dictionary<Glance.FieldsAccessType, List<string>>();
+				_Init();
 			}
-			public string[] Variables
-			{
-				get
-				{
-					_Init();
-					return _variables;
-				}
-				private set
-				{
-					_variables = value;
-				}
-			}
+			public Dictionary<Glance.FieldsAccessType, List<string>> Variables { get;private set; }
 			public string OnUpdate { get; private set; }
 			public string OnStart { get; private set; }
-			public string[] MethodsDeclarations { get; private set; }
+			public Dictionary<Glance.FieldsAccessType, List<string>> MethodsDeclarations { get; private set; }
 			public Dictionary<string, string> MethodsImplementations { get; private set; }
-			public string[] Constructors { get; private set; }
+			public List<string> Constructors { get; private set; }
 			public string ConstructorBody { get; private set; }
 
-			private string[] _variables;
+			//private Dictionary<Glance.FieldsAccessType, List<string>> _variables;
 			private Script _owner;
 			private bool _isInitializated;
-			private void _Init()
+			public void _Init()
 			{
 				if (_isInitializated)
 					return;
 				//
 				var strings = File.ReadAllLines(_owner.FileName);
 				bool isInsideMethod = false;
-				Region currentRegion = Region.Undefined;
 				byte tabs = 0; ;
-				List<string> variables = new List<string>();
+				var variables = new Dictionary<Glance.FieldsAccessType, List<string>>();
 				List<string> constructors = new List<string>();
+
 				string constructorBody = "";
 				string currentMethodSignature = null;
+				Region currentRegion = Region.Undefined;
+				Glance.FieldsAccessType currentAcessType = Glance.FieldsAccessType.Public;
 
 				foreach (var i in strings)
 				{
@@ -126,11 +119,13 @@ namespace Glc.Component
 					if (str.Contains(Glance.NameSetting.ScriptVariablesRegionName))
 					{
 						currentRegion = Region.Variables;
+						currentAcessType = Glance.FieldsAccessType.Public;
 						continue;
 					}
 					if (str.Contains(Glance.NameSetting.ScriptMethodsRegionName))
 					{
 						currentRegion = Region.Methods;
+						currentAcessType = Glance.FieldsAccessType.Public;
 						continue;
 					}
 
@@ -146,8 +141,21 @@ namespace Glc.Component
 					}
 
 					if (currentRegion == Region.Variables)
-						variables.Add(str);
-
+					{
+						if (str.Contains("public:"))
+						{
+							currentAcessType = Glance.FieldsAccessType.Public;
+							continue;
+						}
+						if (str.Contains("private:"))
+						{
+							currentAcessType = Glance.FieldsAccessType.Private;
+							continue;
+						}
+						var tmp = new List<string>();
+						tmp.Add(str.Replace(";", ""));
+						variables.gAddOrMerge(currentAcessType, tmp);
+					}
 					if (currentRegion == Region.Constructor)
 						constructors.AddRange(str.Split(',').gForEach(x => x.Trim()));//add Trimmed array
 
@@ -161,6 +169,16 @@ namespace Glc.Component
 							//if we are not inside of method, then we are at signature of this method
 							if (Glance.getLastChar(str) != '{')
 								throw new Exception("'{' not at the end of line with method signature, signature is: " + str);
+							if (str.Contains("public:"))
+						{
+							currentAcessType = Glance.FieldsAccessType.Public;
+							continue;
+						}
+						if (str.Contains("private:"))
+						{
+							currentAcessType = Glance.FieldsAccessType.Private;
+							continue;
+						}
 							currentMethodSignature = str.Substring(0, str.Length - 1);//cut '{'
 							++tabs;
 							isInsideMethod = true;
@@ -188,9 +206,9 @@ namespace Glc.Component
 						}
 					}
 				}//foreach
-				Constructors = constructors.ToArray();
+				Constructors = constructors;
 				ConstructorBody = constructorBody;
-				Variables = variables.ToArray();
+				Variables = variables;
 				OnUpdate = MethodsImplementations[Glance.NameSetting.ScriptOnUpdateSignature];
 				OnStart = MethodsImplementations[Glance.NameSetting.ScriptOnStartSignature];
 
@@ -199,10 +217,7 @@ namespace Glc.Component
 				if (MethodsImplementations.ContainsKey(""))
 					MethodsImplementations.Remove("");
 
-				List<string> temp = new List<string>();
-				foreach (var i in MethodsImplementations)
-					temp.Add(i.Key);
-				MethodsDeclarations = temp.ToArray();
+				MethodsDeclarations.Add(Glance.FieldsAccessType.Public, MethodsImplementations.Keys.ToList());
 
 				_isInitializated = true;
 			}//_Init()

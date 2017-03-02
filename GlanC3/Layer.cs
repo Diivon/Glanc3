@@ -13,8 +13,6 @@ namespace Glc
 			_className = "Layer" + _count;
 			_objectName = "layerObject" + _count;
 			++_count;
-			_implementationFilePath = null;
-			_declarationFilePath = null;
 			_objects = new List<GameObject>();
 			_scripts = new List<Component.Script>();
 		}
@@ -35,6 +33,15 @@ namespace Glc
 				i.SetScene(s);
 		}
 
+		public string GetImplementationFileName()
+		{
+			return _scene.ClassName + '-' + ClassName + ".cpp";
+		}
+		public string GetDeclarationFileName()
+		{
+			return _scene.ClassName + '-' + ClassName + ".h";
+		}
+
 		/// <summary>Name of this object for client, and name of this object class in cpp code</summary>
 		public string ClassName
 		{
@@ -45,37 +52,6 @@ namespace Glc
 				else throw new ArgumentException("Name must contain only letters, numbers and cymbol '_'");
 			}
 			get{return _className;}
-		}
-		/// <summary>Path to .h file of this object</summary>
-		public string ImplementationFilePath
-		{
-			get { return _implementationFilePath; }
-			set
-			{
-				if (File.Exists(value))
-					_implementationFilePath = value;
-				else throw new ArgumentException("invalid file path");
-			}
-		}
-		/// <summary>Path to .cpp file of this object</summary>
-		public string DeclarationFilePath
-		{
-			get { return _declarationFilePath; }
-			set
-			{
-				if (File.Exists(value))
-					_declarationFilePath = value;
-				else throw new ArgumentException("invalid file path");
-			}
-		}
-
-		public string GetDeclarationFileName()
-		{
-			return _scene.ClassName + '-' + ClassName + ".h";
-		}
-		public string GetImplementationFileName()
-		{
-			return _scene.ClassName + '-' + ClassName + ".cpp";
 		}
 		/// <summary>Name of this object in cpp code</summary>
 		internal string ObjectName
@@ -90,14 +66,10 @@ namespace Glc
 		/// <summary>Generate .h and .cpp files for this object</summary>
 		internal void GenerateCode()
 		{
-			if (this._implementationFilePath == "" || _implementationFilePath == null)
-				throw new Exception("File implementation do not exist for " + ClassName + ", when GenerateCode called");
-			if (_declarationFilePath == "" || _declarationFilePath == null)
-				throw new Exception("File declaration do not exist for " + ClassName + ", when GenerateCode called");
 			if (_scene == null)
 				throw new Exception("Layer " + ClassName + " haven't Scene, when GenerateCode called");
-			var impl = File.Open(_implementationFilePath, FileMode.Truncate);
-			var decl = File.Open(_declarationFilePath, FileMode.Truncate);
+			var impl = File.Open(Glance.BuildSetting.sourceDir + GetImplementationFileName(), FileMode.Truncate);
+			var decl = File.Open(Glance.BuildSetting.sourceDir + GetDeclarationFileName(), FileMode.Truncate);
 			Glance.CodeGenerator.writeLayer(decl, impl, this);
 			impl.Close();
 			decl.Close();
@@ -105,23 +77,50 @@ namespace Glc
 		/// <summary>return all variables of this layer</summary>
 		internal string GetVariables()
 		{
+			/*
 			string result = "";
+			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
 			foreach (var i in _scripts)
-				result += Glance.GatherStringList(i.GetCppVariables(), ";\n");
+				dict.gAddOrMerge(i.GetCppVariables());
+			result += "public:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Public), ";\n");
 			foreach (var i in _objects)
-				result += i.ClassName + ' ' + i.ObjectName + ";\n";
-			if (result != "")
-				result += '\n';
+				result += i.ClassName + ' ' + i.ObjectName + ";\n";//in public area
+			result += "private:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Private), ";\n");
+			//do not distinct array, if in components two same variables, it must cause compiling error
+			return result;
+			*/
+
+			string result = "";
+			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
+			foreach (var i in _scripts)
+				dict.gAddOrMerge(i.GetCppVariables());
+			dict = dict.gRemoveWhiteSpace();
+
+			result += "\npublic:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Public), ";\n") + ';';
+			foreach (var i in _objects)
+				result += i.ClassName + ' ' + i.ObjectName + ";\n";//in public area
+
+			result += "\nprivate:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Private), ";\n") + ';';
 			return result;
 		}
 		/// <summary>return all methods declaration of this layer</summary>
 		internal string GetMethodsDeclaration()
 		{
-			List<string> result = new List<string>();
+			string result = "";
+			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
 			foreach (var i in _scripts)
-				result.AddRange(i.GetCppMethodsDeclaration());
-			result = result.Distinct().ToList();
-			return Glance.GatherStringList(result, ";\n");
+				dict.gAddOrMerge(i.GetCppMethodsDeclaration());
+			//distinct array
+			result += "public:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Public).Distinct().ToList(), ";\n");
+			result += "private:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Private).Distinct().ToList(), ";\n");
+			//some methods may repeat in different components, it's normal
+			return result;
 		}
 		/// <summary>return all methods implementation of this layer</summary>
 		internal string GetMethodsImplementation()
@@ -186,8 +185,6 @@ namespace Glc
 		internal List<Component.Script> _scripts;
 		internal string _className;
 		protected string _objectName;
-		internal string _implementationFilePath;
-		internal string _declarationFilePath;
 		private static uint _count;
 		static Layer() { _count = 0; }
 	}

@@ -59,7 +59,7 @@ namespace Glc
 			{
 				writeStdInc(fs);
 				foreach (var Scn in scenes)
-					WriteLnIn(fs, "#include \"" + Scn.ClassName + ".h\"");
+					WriteLnIn(fs, "#include \"" + Scn.GetDeclarationFileName() + '"');
 			}
 			///<summary>write header, and implementation of this object</summary>
 			internal static void writePhysicalObject(FileStream declaration, FileStream implementation, PhysicalObject PO)
@@ -69,7 +69,7 @@ namespace Glc
 				WriteLnIn(declaration, templates["Class:PhysicalObject:Declaration"]
 					.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
 					.Replace("#Pos#" , PO.Pos.GetCppCtor())
-					.Replace("#AdditionalConstructorList#", GatherStringList(PO.GetComponentsConstructors(), ", "))
+					.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 					.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 					.Replace("#ComponentsMethods#", PO.GetComponentsMethodsDeclaration())
 					.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
@@ -81,7 +81,7 @@ namespace Glc
 				WriteLnIn(implementation, templates["Class:PhysicalObject:Implementation"]
 					.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
 					.Replace("#Pos#", PO.Pos.GetCppCtor())
-					.Replace("#AdditionalConstructorList#", GatherStringList(PO.GetComponentsConstructors(), ", "))
+					.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 					.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 					.Replace("#ComponentsMethods#", PO.GetComponentsMethodsImplementation())
 					.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
@@ -98,7 +98,7 @@ namespace Glc
 				WriteLnIn(declaration, templates["Class:RenderableObject:Declaration"]
 					.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
 					.Replace("#Pos#", PO.Pos.GetCppCtor())
-					.Replace("#AdditionalConstructorList#", GatherStringList(PO.GetComponentsConstructors(), ", "))
+					.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 					.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 					.Replace("#ComponentsMethods#", PO.GetComponentsMethodsDeclaration())
 					.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
@@ -109,8 +109,8 @@ namespace Glc
 							);
 				WriteLnIn(implementation, templates["Class:RenderableObject:Implementation"]
 					.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
-					.Replace("#Pos#", PO.Pos.GetCppCtor())
-					.Replace("#AdditionalConstructorList#", GatherStringList(PO.GetComponentsConstructors(), ", "))
+					.Replace("#Pos#", PO.Pos.x.ToString() + ", " + PO.Pos.y.ToString())
+					.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
 					.Replace("#ConstructorBody#", PO.GetComponentsConstructorsBody())
 					.Replace("#ComponentsMethods#", PO.GetComponentsMethodsImplementation())
 					.Replace("#OnUpdate#", PO.GetComponentsOnUpdate())
@@ -125,7 +125,7 @@ namespace Glc
 			{
 				writeStdInc(declaration);
 				{
-					string getObjects = "";
+					string getObjects = "public:\n";
 					foreach (var i in l._objects)
 					{
 						getObjects += "template<>\n" + i.ClassName + " & getObject(){\nreturn " + i.ObjectName + ";\n}\n";
@@ -169,76 +169,43 @@ namespace Glc
 						);
 				}//implementation
 			}
-			internal static void writeScene(FileStream fs, Scene S)
+			internal static void writeScene(FileStream fs, Scene s)
 			{
 				writeStdInc(fs);
-				foreach(var obj in S.LayerList)                 //includes
-					WriteLnIn(fs, "#include \"" + obj.GetDeclarationFileName() + '"');
-
-				string layers = "";
-				foreach (var i in S.LayerList)
-					layers += i.ClassName + ' ' + i.ObjectName + ";\n";	//variables
-
-				string ctors = "";
-				foreach (var i in S.LayerList)
-					ctors += i.ObjectName + "(*this), ";		//constructors
-				ctors = ctors.Remove(ctors.Length - 2, 2);
-
-				string start = "";
-				foreach (var i in S.LayerList)
-					start += i.ObjectName + ".onStart();\n";    //onStarts
-
-				string update = "";
-				foreach (var i in S.LayerList)
-					update += i.ObjectName + ".onUpdate(dt);\n";//onUpdates
-
-				string getLayers = "";
-				foreach (var i in S.LayerList)                  //getLayers
-				{
-					getLayers += "template<>\n" + i.ClassName + " & getLayer(){\n" + "return " + i.ObjectName + ";\n}\n";
-					getLayers += "template<>\nconst " + i.ClassName + " & getLayer() const{\n" + "return " + i.ObjectName + ";\n}\n";
-				}
-
-				string layerDeclInclude = "";
-				foreach (var i in S.LayerList)					//includes
-					layerDeclInclude += "#include \"" + i.GetDeclarationFileName() + "\"\n";
-
-				string renderScene = "template<>\ninline void ::gc::Renderer::renderScene(const " + S.ClassName + " & s){\n";
-				foreach (var i in S.LayerList)					//renderScene 
-						renderScene += "this->renderLayer(s.getLayer<" + i.ClassName + ">());\n";
-				renderScene += '}';
-
 				WriteLnIn(fs, templates["Сlass:Scene:FDef"]
-									.Replace("#ClassName#", S.ClassName)
-									.Replace("#Layers#", layers)
-									.Replace("#Ctors#", ctors)
-									.Replace("#start#", start)
-									.Replace("#update#", update)
-									.Replace("#getLayers#", getLayers)
-									.Replace("#LayersDeclarationInclude#", layerDeclInclude)
-									.Replace("#RenderScene#", renderScene)
+									.Replace("#ClassName#", s.ClassName)
+									.Replace("#Layers#", s.GetVariables())
+									.Replace("#Ctors#", s.GetConstructors())
+									.Replace("#start#", s.GetAllLayersOnStart())
+									.Replace("#update#", s.GetAllLayersOnUpdate())
+									.Replace("#getLayers#", s.GetGetLayers())
+									.Replace("#LayersDeclarationInclude#", s.GetIncludes())
+									.Replace("#RenderScene#", s.GetRender())
 					);
 			}
 			///<summary>Code generate</summary>
 			internal static void GenerateCode()
 			{
-				foreach (var Lr in	scenes[0].LayerList)//objects
+				foreach (var scene in scenes)
 				{
-					foreach (var SO in Lr._objects)
+					foreach (var Lr in  scene.LayerList)//layers
 					{
-						if (SO.ImplementationFilePath == null || SO.ImplementationFilePath == "")
+						foreach (var SO in Lr._objects)
 						{
-							string implFileName = BuildSetting.sourceDir + SO.GetImplementationFileName();
-							File.Create(implFileName).Close();
-							SO.ImplementationFilePath = implFileName;
+							if (SO.ImplementationFilePath == null || SO.ImplementationFilePath == "")
+							{
+								string implFileName = BuildSetting.sourceDir + SO.GetImplementationFileName();
+								File.Create(implFileName).Close();
+								SO.ImplementationFilePath = implFileName;
+							}
+							if (SO.DeclarationFilePath == null || SO.DeclarationFilePath == "")
+							{
+								string declFileName = BuildSetting.sourceDir + SO.GetDeclarationFileName();
+								File.Create(declFileName).Close();
+								SO.DeclarationFilePath = declFileName;
+							}
+							SO.GenerateCode();
 						}
-						if (SO.DeclarationFilePath == null || SO.DeclarationFilePath == "")
-						{
-							string declFileName = BuildSetting.sourceDir + SO.GetDeclarationFileName();
-							File.Create(declFileName).Close();
-							SO.DeclarationFilePath = declFileName;
-						}
-						SO.GenerateCode();
 					}
 				}
 				{//layers	
@@ -251,9 +218,12 @@ namespace Glc
 						}
 				}
 				{//scenes
-					var Scfs = File.Create(BuildSetting.sourceDir + scenes[0].GetDeclarationFileName());
-					writeScene(Scfs, scenes[0]);
-					Scfs.Close();
+					foreach (var i in scenes)
+					{
+						var Scfs = File.Create(BuildSetting.sourceDir + i.GetDeclarationFileName());
+						writeScene(Scfs, i);
+						Scfs.Close();
+					}
 				}
 				{//mainh
 					var mainHfs = File.Create(BuildSetting.sourceDir + "main.h");

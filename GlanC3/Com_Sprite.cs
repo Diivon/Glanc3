@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Glc.Component
 {
@@ -15,27 +12,32 @@ namespace Glc.Component
 			{
 				FileName = fn;
 			}
-			internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
+			internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppVariables()
 			{
-                var result = new Dictionary<Glance.FieldsAccessType, string[]>();
-                result.Add(Glance.FieldsAccessType.Public, Glance.templates["Com:Sprite:Vars"].Split(';').gForEach(x => x.Trim()));
+                var result = new Dictionary<Glance.FieldsAccessType, List<string>>();
+				var variables = Glance.templates["Com:Sprite:Vars"].Split(';').gForEach(x => x.Trim());
+				result.Add(Glance.FieldsAccessType.Public, variables.ToList());
                 return result;
             }
-			internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppMethodsDeclaration()
+			internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppMethodsDeclaration()
 			{
-                var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+                var result = new Dictionary<Glance.FieldsAccessType, List<string>>();
                 var methods = Glance.templates["Com:Sprite:Methods"].Split(';').gForEach(x => x.Trim());
-                result.Add(Glance.FieldsAccessType.Public, methods);
+                result.Add(Glance.FieldsAccessType.Public, methods.ToList());
                 return result;
             }
 			internal override Dictionary<string, string> GetCppMethodsImplementation()
 			{
-                //выкинуть нахуй инфу про доступ, заполнить вэлью пустыми строками
+				var result = new Dictionary<string, string>();
+				foreach (var i in GetCppMethodsDeclaration())//{ {Public, {"void a()"}}, {Private, {"int b(int)"}} }
+					foreach (var u in i.Value)  //{ "void a()", "int b(int)" }
+						result.Add(u, "");      //{ {"void a()", ""}, {"int b()", ""} }
+				return result;
 			}
-			internal override string[] GetCppConstructor()
+			internal override List<string> GetCppConstructor()
 			{
 				return Glance.templates["Com:Sprite:Constructor"].Replace("#FileName#", Glance.ToCppString(FileName))
-							.Trim().Split(',').gForEach(x => x.Trim());
+							.Split(',').gForEach(x => x.Trim()).ToList();
 			}
 			internal override string GetCppConstructorBody()
 			{

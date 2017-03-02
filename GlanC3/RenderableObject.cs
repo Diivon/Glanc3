@@ -39,26 +39,34 @@ namespace Glc
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
 			string result = "";
-			foreach (var com in _components)
-				result += Glance.GatherStringList(com.GetCppVariables(), ";\n");
-			result += Glance.GatherStringList(GraphComponent.GetCppVariables(), ";\n");
-			if (result != "")//if no variables, no need for '\n'
-				result += '\n';
+			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
+			foreach (var i in _components)
+				dict.gAddOrMerge(i.GetCppVariables());
+			dict.gAddOrMerge(GraphComponent.GetCppVariables());
+			dict = dict.gRemoveWhiteSpace();
+
+			result += "\npublic:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Public), ";\n") + ';';
+			result += "\nprivate:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Private), ";\n") + ';';
 			return result;
 		}
 		internal override string GetComponentsMethodsDeclaration()
 		{
 			if (GraphComponent == null)
 				throw new InvalidOperationException("GraphComponent for Object " + ClassName + "is empty");
-			List<string> result = new List<string>();
+			string result = "";
+			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
 			foreach (var i in _components)
-				result.AddRange(i.GetCppMethodsDeclaration());
-			result.AddRange(GraphComponent.GetCppMethodsDeclaration());
-			result = result.Distinct().ToList();
-			if (result.Count == 0)
-				return "";
-			else
-				return Glance.GatherStringList(result, ";\n");
+				dict.gAddOrMerge(i.GetCppMethodsDeclaration());
+			dict.gAddOrMerge(GraphComponent.GetCppMethodsDeclaration());
+			//distinct array
+			result += "public:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Public).Distinct().ToList(), ";\n");
+			result += "private:\n";
+			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Private).Distinct().ToList(), ";\n");
+			//some methods may repeat in different components, it's normal
+			return result;
 		}
 		internal override string GetComponentsMethodsImplementation()
 		{
@@ -81,7 +89,10 @@ namespace Glc
 			List<string> result = new List<string>();
 			foreach (var i in _components)
 				result.AddRange(i.GetCppConstructor());
-			return Glance.GatherStringList(result, ", ");
+			result.AddRange(GraphComponent.GetCppConstructor());
+			if (result.Count == 0)
+				return "";
+			return ", " + Glance.GatherStringList(result, ", ");
 		}
 		internal override string GetComponentsConstructorsBody()
 		{

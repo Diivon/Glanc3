@@ -8,9 +8,10 @@ namespace Glc
 	{
 		public Scene()
 		{
-			ClassName = "Scene" + _count++;
+			ClassName = "Scene" + _count.ToString();
 			ObjectName = "Obj" + ClassName;
 			LayerList = new List<Layer>();
+			++_count;
 		}
 		public string ClassName
 		{
@@ -41,6 +42,7 @@ namespace Glc
 		{
 			return ClassName + ".h";
 		}
+		public List<Layer> LayerList;
 		private string _className;
 		private string _objectName;
 		private static int _count;
@@ -59,6 +61,46 @@ namespace Glc
 				result += i.ObjectName + ".onUpdate(dt);\n";
 			return result;
 		}
-		internal List<Layer> LayerList;
+		internal string GetVariables()
+		{
+			string result = "";
+			foreach (var i in LayerList)
+				result += i.ClassName + ' ' + i.ObjectName + ";\n"; //variables
+			return result;
+		}
+		internal string GetConstructors()
+		{
+			if (LayerList.Count == 0)
+				return "";
+			var list = new List<string>();
+			foreach (var i in LayerList)
+				list.Add(i.ObjectName + "(*this)");
+			return ":\n" + Glance.GatherStringList(list, ", ");
+		}
+		internal string GetGetLayers()
+		{
+			var result = "";
+			foreach (var i in LayerList)
+			{
+				result += "template<>\n" + i.ClassName + " & getLayer(){\nreturn " + i.ObjectName + ";\n}\n";
+				result += "template<>\nconst " + i.ClassName + " & getLayer() const{\nreturn " + i.ObjectName + ";\n}\n";
+			}
+			return result;
+		}
+		internal string GetRender()
+		{
+			string result = "template<>\ninline void ::gc::Renderer::renderScene(const " + ClassName + " & s){\n";
+			foreach (var i in LayerList)	//renderScene
+				result += "this->renderLayer(s.getLayer<" + i.ClassName + ">());\n";
+			result += '}';
+			return result;
+		}
+		internal string GetIncludes()
+		{
+			var result = "";
+			foreach (var i in LayerList)
+				result += "#include \"" + i.GetDeclarationFileName() + "\"\n";
+			return result;
+		}
 	}
 }

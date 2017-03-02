@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Glc.Component
 {
@@ -24,7 +25,7 @@ namespace Glc.Component
 		public Collider SetSize(Vec2 s) { if (type == Type.Circle) throw new Exception("An attempt to SetSize to Circle Collider was found!"); size = s; return this; }
 		public Collider SetRadius(float r) { if (type == Type.Rectangle) throw new Exception("An attempt to SetRadius to Rectangle Collider was found!"); radius = r;  return this; }
 
-		internal override string[] GetCppConstructor()
+		internal override List<string> GetCppConstructor()
 		{
 			switch (type)
 			{
@@ -33,15 +34,13 @@ namespace Glc.Component
 								.Replace("#ColliderName#", Glance.NameSetting.ColliderName)
 								.Replace("#Pos#", pos.GetCppCtor())
 								.Replace("#Size#", size.GetCppCtor())
-								.Split(',').gForEach(x => x.Trim())
-					;
+								.Split(',').gForEach(x => x.Trim()).ToList();
 				case Type.Circle:
 					return Glance.templates["Com:Collider:Constructor"]
 								.Replace("#ColliderName#", Glance.NameSetting.ColliderName)
 								.Replace("#Pos#", pos.GetCppCtor())
 								.Replace("#Size#", Glance.floatToString(radius))
-								.Split(',').gForEach(x => x.Trim())
-					;
+								.Split(',').gForEach(x => x.Trim()).ToList();
 				default:
 					throw new Exception("Glc.Component.Collider.GetCppConstructor has been hacked, param type is: " + type.ToString());
 			}
@@ -50,28 +49,21 @@ namespace Glc.Component
 		{
 			return Glance.templates["Com:Collider:ConstructorBody"];
 		}
-		internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppMethodsDeclaration()
+		internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppMethodsDeclaration()
 		{
-            var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+            var result = new Dictionary<Glance.FieldsAccessType, List<string>>();
             var methods = Glance.templates["Com:Collider:Methods"].Split(';').gForEach(x => x.Trim());
-            result.Add(Glance.FieldsAccessType.Public, methods);
+            result.Add(Glance.FieldsAccessType.Public, methods.ToList());
             return result;
 		}
-		internal override Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables()
+		internal override Dictionary<Glance.FieldsAccessType, List<string>> GetCppVariables()
 		{
-            /*
-			return Glance.templates["Com:Collider:Vars"]
-								.Replace("#ColliderType#", TypeToCppType(type))
-								.Replace("#ColliderTypeName#", Glance.NameSetting.ColliderType)
-								.Replace("#ColliderName#", Glance.NameSetting.ColliderName)
-				.Split(';');
-            */
-            var result = new Dictionary<Glance.FieldsAccessType, string[]>();
+            var result = new Dictionary<Glance.FieldsAccessType, List<string>>();
             var variables = Glance.templates["Com:Collider:Vars"]
                                 .Replace("#ColliderType#", TypeToCppType(type))
                                 .Replace("#ColliderTypeName#", Glance.NameSetting.ColliderType)
                                 .Replace("#ColliderName#", Glance.NameSetting.ColliderName).Split(';').gForEach(x => x.Trim());
-            result.Add(Glance.FieldsAccessType.Public, variables);
+            result.Add(Glance.FieldsAccessType.Public, variables.ToList());
             return result;
         }
 		internal override Dictionary<string, string> GetCppMethodsImplementation()

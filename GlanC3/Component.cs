@@ -9,11 +9,11 @@ namespace Glc.Component
 			/// <summary>
             /// { {Public, {"int a", "float b"}}, {Private, {"gc::Vec2 dist", "float sec"}} }
             /// </summary>
-			internal abstract Dictionary<Glance.FieldsAccessType, string[]> GetCppVariables();
+			internal abstract Dictionary<Glance.FieldsAccessType, List<string>> GetCppVariables();
             /// <summary>
             /// { {Public, "void a()"}, {Private, "int get(int)"} }
             /// </summary>
-			internal abstract Dictionary<Glance.FieldsAccessType, string[]> GetCppMethodsDeclaration();
+			internal abstract Dictionary<Glance.FieldsAccessType, List<string>> GetCppMethodsDeclaration();
 			/// <summary>
             /// { {"void a()", "gc::debug.log(distance);"}, {"int get(int)", "return 2 * 229;"} }
             /// </summary>
@@ -21,7 +21,7 @@ namespace Glc.Component
 			/// <summary>
             /// {"a()", "b(a)", "c(b, a)"}
             /// </summary>
-			internal abstract string[] GetCppConstructor();
+			internal abstract List<string> GetCppConstructor();
 			/// <summary>
             /// "gc::debug.log("I was born!");"
             /// </summary>
