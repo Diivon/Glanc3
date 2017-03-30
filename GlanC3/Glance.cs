@@ -108,6 +108,8 @@ namespace Glc
 			Init();
 			if (BuildSetting.isGenerateCode)
 			{
+				if (File.Exists(BuildSetting.outputDir + BuildSetting.exeName))
+					File.Delete(BuildSetting.outputDir + BuildSetting.exeName);
 				if (BuildSetting.isClearSrcDir)
 				{
 					if (Directory.Exists(BuildSetting.sourceDir))
@@ -118,7 +120,8 @@ namespace Glc
 					}
 					else Directory.CreateDirectory(BuildSetting.sourceDir);
 				}
-				Glance.CodeGenerator.GenerateCode();
+				Console.WriteLine("Generating c++ code...");
+				CodeGenerator.GenerateCode();
 			}
 			if (BuildSetting.isRunAppAfterCompiling)
 			{
@@ -142,7 +145,19 @@ namespace Glc
 				cmd.StartInfo.UseShellExecute = false;
 				cmd.Start();
 				cmd.StandardInput.WriteLine(BuildSetting.settingsDir + Glance.settings["B:EnvVarsConfig"]);
-				cmd.StandardInput.WriteLine(CreateApplication());
+				var masterFileName = BuildSetting.sourceDir + @"MasterFile.cpp";
+				Console.WriteLine("Merging files in one master file");
+				using (var fs = new StreamWriter(File.Create(masterFileName)))
+					foreach (var i in BuildSetting.complilerTargets)
+					{
+						var str = File.ReadAllText(i);
+						fs.Write(str);
+					}
+				cmd.StandardInput.WriteLine(
+					"cl.exe " + BuildSetting.compilerKeys + ' ' + @"/Fe" + BuildSetting.outputDir + ' ' + 
+					BuildSetting.sourceDir + @"main.cpp " + masterFileName + ' ' + GatherStringList(BuildSetting.libs, " ") +  " /link" + ' ' + BuildSetting.linkerKeys
+					);
+
 				if (BuildSetting.isRunAppAfterCompiling)
 				{
 					cmd.StandardInput.WriteLine("D:");
@@ -164,17 +179,6 @@ namespace Glc
 		internal static Dictionary<string, string> templates;
 		///<summary>else settings for building</summary>
 		internal static Dictionary<string, string> settings;
-
-		///<summary>Build application by rules</summary>
-		///<summary>return string, which call compiler correctly</summary>
-		internal static string CreateApplication()
-        {
-            if (!Directory.Exists(BuildSetting.sourceDir))
-                Directory.CreateDirectory(BuildSetting.sourceDir);
-			if (File.Exists(BuildSetting.outputDir + BuildSetting.exeName))
-				File.Delete(BuildSetting.outputDir + BuildSetting.exeName);
-			return "cl.exe " + BuildSetting.compilerKeys + ' ' + @"/Fe" + BuildSetting.outputDir + ' ' + BuildSetting.sourceDir + @"main.cpp " + GatherStringList(BuildSetting.complilerTargets, " ") + " /link" + ' ' + BuildSetting.linkerKeys;
-		}
 
 		///<summary>parse Glance settings(.gcs) file</summary>
 		internal static void ParseGCS(string[] strings, ref Dictionary<string, string> dict)

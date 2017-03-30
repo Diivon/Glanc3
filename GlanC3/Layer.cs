@@ -68,30 +68,14 @@ namespace Glc
 		{
 			if (_scene == null)
 				throw new Exception("Layer " + ClassName + " haven't Scene, when GenerateCode called");
-			var impl = File.Open(Glance.BuildSetting.sourceDir + GetImplementationFileName(), FileMode.Truncate);
-			var decl = File.Open(Glance.BuildSetting.sourceDir + GetDeclarationFileName(), FileMode.Truncate);
-			Glance.CodeGenerator.writeLayer(decl, impl, this);
-			impl.Close();
-			decl.Close();
+				Glance.CodeGenerator.writeLayer(
+					Glance.BuildSetting.sourceDir + GetDeclarationFileName(),
+					Glance.BuildSetting.sourceDir + GetImplementationFileName(), 
+					this);
 		}
 		/// <summary>return all variables of this layer</summary>
 		internal string GetVariables()
 		{
-			/*
-			string result = "";
-			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
-			foreach (var i in _scripts)
-				dict.gAddOrMerge(i.GetCppVariables());
-			result += "public:\n";
-			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Public), ";\n");
-			foreach (var i in _objects)
-				result += i.ClassName + ' ' + i.ObjectName + ";\n";//in public area
-			result += "private:\n";
-			result += Glance.GatherStringList(dict.gGetByKeyOrDefault(Glance.FieldsAccessType.Private), ";\n");
-			//do not distinct array, if in components two same variables, it must cause compiling error
-			return result;
-			*/
-
 			string result = "";
 			var dict = new Dictionary<Glance.FieldsAccessType, List<string>>();
 			foreach (var i in _scripts)

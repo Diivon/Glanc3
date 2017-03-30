@@ -17,9 +17,8 @@ class Program {
 		Glance.BuildSetting.libs.Add("sfml-system.lib");
 		Glance.BuildSetting.libs.Add("sfml-audio.lib");
 		Glance.BuildSetting.libs.Add("sfml-network.lib");
-		Glance.BuildSetting.complilerTargets.AddRange(Glance.BuildSetting.libs);
 
-		Glance.BuildSetting.compilerKeys =	@"/EHsc " + " /I" + Glance.BuildSetting.sourceDir + " /I" + Glance.BuildSetting.includeDir;
+		Glance.BuildSetting.compilerKeys =	@"/EHsc " + " /I" + Glance.BuildSetting.sourceDir + " /I" + Glance.BuildSetting.includeDir + @" /Zi";
 		Glance.BuildSetting.linkerKeys =	@"/LIBPATH:" + Glance.BuildSetting.libDir;
 
 		Glance.BuildSetting.exeName = "main.exe";
@@ -64,37 +63,15 @@ class Program {
 		Glance.AddScene(scene);
 		
 		/*
-		var scenes = new List<Scene>();
-		for (var i = 0; i < 10; ++i)
-			scenes.Add(new Scene());
-		foreach (var i in scenes)
-			for (var u = 0; u < 4; ++u)
-				i.AddLayer(new Layer());
-		foreach (var i in scenes)
-			foreach (var u in i.LayerList)
-				for (var y = 0; y < 12; ++y)
-				{
-					var obj = new RenderableObject(new Vec2(new Random().Next(50, 700), new Random().Next(50, 500)));
-					obj.GraphComponent = new Glc.Component.GraphicalComponent.Sprite("resources\\n\\" + new Random().Next(0, 4).ToString() + ".jpg");
-					u.AddObject(obj);
-				}
-		foreach (var i in scenes)
-			Glance.AddScene(i);
-		
-		/*
+		var rand = new Random();
 		var scene = new Scene();
 		var layer = new Layer();scene.AddLayer(layer);
-		var obj = new RenderableObject(new Vec2(50, 50));layer.AddObject(obj);
-		obj.GraphComponent = new Glc.Component.GraphicalComponent.Sprite(@"resources\n\1.jpg");
-		var coll = new Glc.Component.Collider(Glc.Component.Collider.Type.Circle);
-		coll.SetPosition(obj.Pos).SetRadius(25);
-		obj.AddComponent(coll);
-
+		for (uint i = 0; i < 10000; ++i)
+			layer.AddObject(new PhysicalObject(new Vec2(rand.Next(0, 800), rand.Next(0, 500))));
 		Glance.AddScene(scene);
 		*/
 		//-------------Client code ends here
 		Glance.Build();
-		GC.Collect();
 
 		Console.ReadKey();
     }

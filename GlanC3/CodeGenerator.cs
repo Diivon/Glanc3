@@ -12,14 +12,15 @@ namespace Glc
 			///<summary>FileStream for Write/WriteLn</summary>
 			internal static FileStream FStream;
 			///<summary>write data + '\n' -> fs considering TabCount</summary>
-			internal static void WriteLnIn(FileStream fs, string data)
+			internal static void WriteLnIn(string fs, string data)
 			{
 				if (data == null)
 					throw new ArgumentNullException();
 				char[] charsToTrim = { '\t', ' ' };
 				string[] strings = data.Split('\n');	//return lines
-				int tabcount = 0;						//code block level(if they are inside '{', '}')
-				foreach(var str in strings)				//for every line in data
+				int tabcount = 0;                       //code block level(if they are inside '{', '}')
+				string result = "";
+				foreach (var str in strings)				//for every line in data
 				{
 					if (String.IsNullOrWhiteSpace(str))	//if white space
 						continue;
@@ -30,21 +31,20 @@ namespace Glc
 					string finalstr = "";				//string, that will be writed in file
 					for (byte i = 0; i < tabcount; ++i)	//add tabs 
 						finalstr += '\t';               //for better reading
-					finalstr += str.Trim();				//without trash
-					byte[] finalBytes = Encoding.Unicode.GetBytes(finalstr + '\n');//line as bytes to write in file
-					fs.Write(finalBytes, 0, finalBytes.Length);
-
+					finalstr += str.Trim();             //without trash
+					result += finalstr + '\n';
 					if (str.Contains('{'))              //if block is started P.S. it make bugs if '{' and '}' at the same line
 						++tabcount;
 				}
+				File.WriteAllText(fs, result);
 			}
 			///<summary>write "StandartIncludes" from settings.gcs -> fs</summary>
-			internal static void writeStdInc(FileStream fs)
+			internal static string getStdInc()
 			{
-				WriteLnIn(fs, templates["Set:StandartIncludes:Def"]);
+				return templates["Set:StandartIncludes:Def"] + '\n';
 			}
 			///<summary> </summary>
-			internal static void writeMainCpp(FileStream fs)
+			internal static void writeMainCpp(string fs)
 			{
 				string Sub_include = "#include \"main.h\"";
 				WriteLnIn(fs,
@@ -55,18 +55,17 @@ namespace Glc
 						);
 			}
 			///<summary>include everything, what must know main.cpp</summary>
-			internal static void writeMainH(FileStream fs)
+			internal static void writeMainH(string fs)
 			{
-				writeStdInc(fs);
+				string result = "";
 				foreach (var Scn in scenes)
-					WriteLnIn(fs, "#include \"" + Scn.GetDeclarationFileName() + '"');
+					result += "#include \"" + Scn.GetDeclarationFileName() + "\"\n";
+				WriteLnIn(fs, getStdInc() + result);
 			}
 			///<summary>write header, and implementation of this object</summary>
-			internal static void writePhysicalObject(FileStream declaration, FileStream implementation, PhysicalObject PO)
+			internal static void writePhysicalObject(string declaration, string implementation, PhysicalObject PO)
 			{
-
-				writeStdInc(declaration);
-				WriteLnIn(declaration, templates["Class:PhysicalObject:Declaration"]
+				WriteLnIn(declaration, getStdInc() +  templates["Class:PhysicalObject:Declaration"]
 					.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
 					.Replace("#Pos#" , PO.Pos.GetCppCtor())
 					.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
@@ -91,11 +90,9 @@ namespace Glc
 					.Replace("#LayerName#", PO._layer.ClassName)
 							);
 			}
-			internal static void writeRenderableObject(FileStream declaration, FileStream implementation, RenderableObject PO)
+			internal static void writeRenderableObject(string declaration, string implementation, RenderableObject PO)
 			{
-				writeStdInc(declaration);
-
-				WriteLnIn(declaration, templates["Class:RenderableObject:Declaration"]
+				WriteLnIn(declaration, getStdInc() +  templates["Class:RenderableObject:Declaration"]
 					.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
 					.Replace("#Pos#", PO.Pos.GetCppCtor())
 					.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
@@ -107,7 +104,7 @@ namespace Glc
 					.Replace("#SceneName#", PO._scene.ClassName)
 					.Replace("#LayerName#", PO._layer.ClassName)
 							);
-				WriteLnIn(implementation, templates["Class:RenderableObject:Implementation"]
+				WriteLnIn(implementation, getStdInc() +  templates["Class:RenderableObject:Implementation"]
 					.Replace("#ComponentsVariables#", PO.GetComponentsVariables())
 					.Replace("#Pos#", PO.Pos.x.ToString() + ", " + PO.Pos.y.ToString())
 					.Replace("#AdditionalConstructorList#", PO.GetComponentsConstructors())
@@ -121,9 +118,8 @@ namespace Glc
 					.Replace("#GetCurrentSprite#", PO.GetCurrentSprite())
 							);
 			}
-			internal static void writeLayer(FileStream declaration, FileStream implementation, Layer l)
+			internal static void writeLayer(string declaration, string implementation, Layer l)
 			{
-				writeStdInc(declaration);
 				{
 					string getObjects = "public:\n";
 					foreach (var i in l._objects)
@@ -142,7 +138,7 @@ namespace Glc
 							render += "this->render(l.getObject<" + i.ClassName + ">().getCurrentSprite(), l.getObject<" + i.ClassName + ">().pos);\n";
 					render += '}';
 
-					WriteLnIn(declaration, templates["Class:Layer:Declaration"]
+					WriteLnIn(declaration, getStdInc() + templates["Class:Layer:Declaration"]
 										.Replace("#SceneName#", l._scene.ClassName)
 										.Replace("#ClassName#", l.ClassName)
 										.Replace("#ObjectVariables#", l.GetVariables())
@@ -169,10 +165,9 @@ namespace Glc
 						);
 				}//implementation
 			}
-			internal static void writeScene(FileStream fs, Scene s)
+			internal static void writeScene(string fs, Scene s)
 			{
-				writeStdInc(fs);
-				WriteLnIn(fs, templates["Сlass:Scene:FDef"]
+				WriteLnIn(fs, getStdInc() +  templates["Сlass:Scene:FDef"]
 									.Replace("#ClassName#", s.ClassName)
 									.Replace("#Layers#", s.GetVariables())
 									.Replace("#Ctors#", s.GetConstructors())
@@ -212,28 +207,20 @@ namespace Glc
 					foreach (var i in scenes)
 						foreach(var o in i.LayerList)
 						{
-							var Lrhfs = File.Create(BuildSetting.sourceDir + o.GetDeclarationFileName());
-							var Lrcppfs = File.Create(BuildSetting.sourceDir + o.GetImplementationFileName());
-							writeLayer(Lrhfs, Lrcppfs, o);
+							writeLayer(BuildSetting.sourceDir + o.GetDeclarationFileName(), BuildSetting.sourceDir + o.GetImplementationFileName(), o);
 						}
 				}
 				{//scenes
 					foreach (var i in scenes)
 					{
-						var Scfs = File.Create(BuildSetting.sourceDir + i.GetDeclarationFileName());
-						writeScene(Scfs, i);
-						Scfs.Close();
+						writeScene(BuildSetting.sourceDir + i.GetDeclarationFileName(), i);
 					}
 				}
 				{//mainh
-					var mainHfs = File.Create(BuildSetting.sourceDir + "main.h");
-					writeMainH(mainHfs);
-					mainHfs.Close();
+					writeMainH(BuildSetting.sourceDir + "main.h");
 				}
 				{//maincpp
-					var MainCppfs = File.Create(BuildSetting.sourceDir + "main.cpp");
-					writeMainCpp(MainCppfs);
-					MainCppfs.Close();
+					writeMainCpp(BuildSetting.sourceDir + "main.cpp");
 				}
 
 			}
