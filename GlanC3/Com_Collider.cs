@@ -32,13 +32,11 @@ namespace Glc.Component
 				case Type.Rectangle:
 				return Glance.templates["Com:Collider:Constructor"]
 								.Replace("#ColliderName#", Glance.NameSetting.ColliderName)
-								.Replace("#Pos#", pos.GetCppCtor())
 								.Replace("#Size#", size.GetCppCtor())
 								.Split(',').gForEach(x => x.Trim()).ToList();
 				case Type.Circle:
 					return Glance.templates["Com:Collider:Constructor"]
 								.Replace("#ColliderName#", Glance.NameSetting.ColliderName)
-								.Replace("#Pos#", pos.GetCppCtor())
 								.Replace("#Size#", Glance.floatToString(radius))
 								.Split(',').gForEach(x => x.Trim()).ToList();
 				default:

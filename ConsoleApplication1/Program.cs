@@ -61,15 +61,6 @@ class Program {
 		scene.AddLayer(layer1);
 		scene.AddLayer(layer2);
 		Glance.AddScene(scene);
-		
-		/*
-		var rand = new Random();
-		var scene = new Scene();
-		var layer = new Layer();scene.AddLayer(layer);
-		for (uint i = 0; i < 10000; ++i)
-			layer.AddObject(new PhysicalObject(new Vec2(rand.Next(0, 800), rand.Next(0, 500))));
-		Glance.AddScene(scene);
-		*/
 		//-------------Client code ends here
 		Glance.Build();
 

@@ -153,6 +153,9 @@ namespace Glc
 					string ctorList = "";
 					foreach (var i in l._objects)
 						ctorList += ", " + i.ObjectName + "(scene, *this)";
+					string foreach_str = "";
+					foreach (var i in l._objects)
+						foreach_str += "f(this->getObject<" + i.ClassName + ">());\n";
 
 					WriteLnIn(implementation, templates["Class:Layer:Implementation"]
 										.Replace("#SceneName#", l._scene.ClassName)
@@ -162,6 +165,7 @@ namespace Glc
 										.Replace("#OnStart#", l.GetOnStart())
 										.Replace("#OnUpdate#", l.GetOnUpdate())
 										.Replace("#ComponentsMethodsImplementation#", l.GetMethodsImplementation())
+										.Replace("#Foreach#", foreach_str)
 						);
 				}//implementation
 			}
