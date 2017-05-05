@@ -33,7 +33,7 @@ class Program {
 		var scene = new Scene();
 		var layer1 = new Layer();
 		var layer2 = new Layer();
-		layer1.AddScript(new Glc.Component.Script(@"a.cpp"));
+		layer1.AddScript(new Glc.Component.Script(@"layer.cpp"));
 
 		var obj1 = new RenderableObject(new Vec2(50, 50));
 		obj1.ClassName = "Number1";
@@ -52,8 +52,9 @@ class Program {
 		obj2.GraphComponent = anim;
 		obj2.AddComponent(new Glc.Component.Script("num2.cpp"));
 		obj2.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Rectangle).SetPosition(obj2.Pos).SetSize(new Vec2(50, 50)));
-
 		var phys1 = new PhysicalObject(new Vec2(-200, -200));
+
+		//Glc.Component.Script.CreateFile("@MyFile.cpp");
 		
 		layer1.AddObject(obj1);
 		layer1.AddObject(obj2);

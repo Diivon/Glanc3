@@ -17,18 +17,19 @@ namespace Glc.Component
 			if (onUpdateCode.Contains(Glance.NameSetting.AnimatorName + ".update"))
 				throw new Exception("Animator updated in script");
 		}
-		public void CreateFile(string path)
+		public static void CreateFile(string path)
 		{
-			var fs = System.IO.File.Create(path);
-			string str = Glance.templates["B:Script"];
-			byte[] arr = System.Text.Encoding.Unicode.GetBytes(str);
-			fs.Write(arr, 0, arr.Length);
-			fs.Close();
+			using (var fs = System.IO.File.Create(path))
+			{
+				string str = Glance.templates["B:Script"];
+				byte[] arr = System.Text.Encoding.Unicode.GetBytes(str);
+				fs.Write(arr, 0, arr.Length);
+			}
 		}
 		public Script(string filename)
 		{
 			if (!File.Exists(Glance.BuildSetting.scriptsDir + filename))
-				throw new ArgumentException();
+				throw new ArgumentException("script file not found");
 			FileName = Glance.BuildSetting.scriptsDir + filename;
 			_data = new _Data(this);
 		}
