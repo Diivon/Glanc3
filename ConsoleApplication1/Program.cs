@@ -40,7 +40,7 @@ class Program {
 		obj1.GraphComponent = new Glc.Component.GraphicalComponent.Sprite(@"resources\n\1.jpg");
 		obj1.AddComponent(new Glc.Component.Script("num1.cpp"));
 		obj1.AddComponent(new Glc.Component.Script("num1-detect-collide.cpp"));
-		obj1.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Rectangle).SetPosition(obj1.Pos).SetSize(new Vec2(50, 50)));
+		obj1.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Rectangle).SetSize(new Vec2(50, 50)));
 
 		var obj2 = new RenderableObject(new Vec2(50, 100));
 		obj2.ClassName = "Number2";
@@ -51,7 +51,7 @@ class Program {
 		anim.AddFrame(new SpriteFrame(@"resources\n\4.jpg", 500));
 		obj2.GraphComponent = anim;
 		obj2.AddComponent(new Glc.Component.Script("num2.cpp"));
-		obj2.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Rectangle).SetPosition(obj2.Pos).SetSize(new Vec2(50, 50)));
+		obj2.AddComponent(new Glc.Component.Collider(Glc.Component.Collider.Type.Rectangle).SetSize(new Vec2(50, 50)));
 		var phys1 = new PhysicalObject(new Vec2(-200, -200));
 
 		//Glc.Component.Script.CreateFile("@MyFile.cpp");

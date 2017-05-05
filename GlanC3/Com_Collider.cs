@@ -21,7 +21,6 @@ namespace Glc.Component
 		public Type type;
 		public float radius;
 
-		public Collider SetPosition(Vec2 p) { pos = p;  return this; }
 		public Collider SetSize(Vec2 s) { if (type == Type.Circle) throw new Exception("An attempt to SetSize to Circle Collider was found!"); size = s; return this; }
 		public Collider SetRadius(float r) { if (type == Type.Rectangle) throw new Exception("An attempt to SetRadius to Rectangle Collider was found!"); radius = r;  return this; }
 
