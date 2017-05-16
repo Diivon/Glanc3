@@ -105,7 +105,6 @@ namespace Glc
 		{
 			if (scenes.Count == 0)
 				return;
-			Init();
 			if (BuildSetting.isGenerateCode)
 			{
 				if (File.Exists(BuildSetting.outputDir + BuildSetting.exeName))
@@ -168,7 +167,7 @@ namespace Glc
 			}
 		}
 
-		private static void Init()
+		public static void Init()
 		{
 			var files = Directory.GetFiles(BuildSetting.settingsDir, "T_*.gcs");
 			foreach (var file in files)

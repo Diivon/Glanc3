@@ -29,7 +29,7 @@ namespace Glc.Component
 		public Script(string filename)
 		{
 			if (!File.Exists(Glance.BuildSetting.scriptsDir + filename))
-				throw new ArgumentException("script file not found");
+				throw new ArgumentException("script file not found " + filename);
 			FileName = Glance.BuildSetting.scriptsDir + filename;
 			_data = new _Data(this);
 		}
