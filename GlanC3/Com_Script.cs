@@ -22,7 +22,7 @@ namespace Glc.Component
 			using (var fs = System.IO.File.Create(path))
 			{
 				string str = Glance.templates["B:Script"];
-				byte[] arr = System.Text.Encoding.Unicode.GetBytes(str);
+				byte[] arr = System.Text.Encoding.UTF8.GetBytes(str);
 				fs.Write(arr, 0, arr.Length);
 			}
 		}

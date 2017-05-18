@@ -119,7 +119,6 @@ namespace Glc
 					}
 					else Directory.CreateDirectory(BuildSetting.sourceDir);
 				}
-				Console.WriteLine("Generating c++ code...");
 				CodeGenerator.GenerateCode();
 			}
 			if (BuildSetting.isRunAppAfterCompiling)
